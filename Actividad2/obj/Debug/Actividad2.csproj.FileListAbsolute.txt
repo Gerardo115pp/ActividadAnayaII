@@ -1,0 +1,10 @@
+C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\bin\Debug\Actividad2.exe.config
+C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\bin\Debug\Actividad2.exe
+C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\bin\Debug\Actividad2.pdb
+C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\obj\Debug\Actividad2.csprojAssemblyReference.cache
+C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\obj\Debug\Actividad2.MainWindow.resources
+C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\obj\Debug\Actividad2.Properties.Resources.resources
+C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\obj\Debug\Actividad2.csproj.GenerateResource.cache
+C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\obj\Debug\Actividad2.csproj.CoreCompileInputs.cache
+C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\obj\Debug\Actividad2.exe
+C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\obj\Debug\Actividad2.pdb
