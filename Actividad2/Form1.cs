@@ -390,42 +390,118 @@ namespace Actividad2
             return this.vecinos;
         }
 
-        public bool Bresenham_Line(Bitmap bitmap, vertice other)
+        public void Bresenham_Line(Bitmap bitmap, vertice other)
         {
-            Color color = Color.FromArgb(149, 9, 200);
-            if(cords[0] == other.getX() && cords[1] == other.getY())
+            Color color = Color.FromArgb(148, 9, 200);
+            int x0 = cords[0], y0 = cords[1], x1 = other.getX(), y1 = other.getY();
+            float dx, dy, m;
+            int kx = 0, ky = 0;
+            float d1, d2, d3;
+
+            dx = x1 - x0;
+            dy = y1 - y0;
+
+            if(dx == 0)
             {
-                bitmap.SetPixel(cords[0], cords[1], color);
-                return true;
-            }
-
-            int x0 = cords[0], y0 = cords[1];
-            int x1 = other.getX(), y1 = other.getY();
-
-            int dx = x1 - x0;
-            int sx = (dx < 0) ? -1 : 1;
-            int dy = y1 - y0;
-            int sy = (dy < 0) ? -1 : 1; 
-
-            if(Math.Abs(dy) < Math.Abs(dx))
-            {
-                int m = dy / dx;
-                int b = y0 - m * x0;
-                int my = dx / dy;
-                int by = x0 - m * y0;
-                while (x0 != x1 && y0 != y1)
+                if(dy > 0)
                 {
-                    bitmap.SetPixel((int)Math.Round(Convert.ToDouble(m * y0 + b)), (int)Math.Round(Convert.ToDouble(m * x0 + b)), color);
-                    x0 += sx;
-                    if(y0 != y1)
+                    for(int k = y0; k <= y1; k++)
                     {
-                        bitmap.SetPixel((int)Math.Round(Convert.ToDouble(m * y0 + b)), (int)Math.Round(Convert.ToDouble(m * x0 + b)), color);
-                        y0 += sy;
+                        bitmap.SetPixel(x0, k, color);
                     }
                 }
             }
-            bitmap.SetPixel(x1, y1, color);
-            return true;
+            if (dy == 0)
+            {
+                if(dy > 0)
+                {
+                    for(int k = x1; k <= x1; k++)
+                    {
+                        bitmap.SetPixel(k, y0,color);
+                    }
+                }
+            }
+            if (dx < 0 && dy < 0 || dx > 0 && dy < 0)
+            {
+                float inx = x0, iny = y0;
+                x0 = x1;
+                x1 = (int)inx;
+
+                y0 = y1;
+                y1 = (int)iny;
+            }
+            if(Math.Abs(dx) > Math.Abs(dy))
+            {
+                m = dy / dx;
+
+                if(m > 0)
+                {
+                    for(kx = 1; kx < dx; kx++)
+                    {
+                        d1 = m * kx - ky;
+                        d2 = (ky + 1) - m * kx;
+                        d3 = d1 - d2;
+                        if(d3 > 0)
+                        {
+                            ky++;
+                        }
+
+                        bitmap.SetPixel(x0 + kx, y0 + ky, color);
+                    }
+                }
+                else
+                {
+                    for(kx = -1; kx > dx; kx--)
+                    {
+                        d1 = m * kx - ky;
+                        d2 = (ky + 1) - m * kx;
+                        d3 = d1 - d2;
+
+                        if(d3 > 0)
+                        {
+                            ky++;
+                        }
+
+                        bitmap.SetPixel(x0 + kx, y0 + ky, color);
+                    }
+                }
+            }
+            else if(Math.Abs(dy) > Math.Abs(dx))
+            {
+                m = dx / dy;
+                
+                if (m > 0)
+                {
+                    for(ky = 1; ky < dy; ky++)
+                    {
+                        d1 = m * ky - kx;
+                        d2 = (kx + 1) - m * kx;
+                        d3 = d1 - d2;
+                        if (d3 > 0)
+                        {
+                            kx++;
+                        }
+
+                        bitmap.SetPixel(x0 + kx, y0 + ky, color);
+                    }
+                }
+                if(m < 0)
+                {
+                    m = Math.Abs(m);
+                    for (ky = 1; ky < dy; ky++)
+                    {
+                        d1 = m * ky - kx;
+                        d2 = (kx + 1) - m * ky;
+                        d3 = d1 - d2;
+                        if(d3 > 0)
+                        {
+                            kx++;
+                        }
+                        bitmap.SetPixel(x0 - kx, y0 - ky, color);
+                    }
+                }
+            }
+
         }
 
         public void breadth(vertice vex = null)
