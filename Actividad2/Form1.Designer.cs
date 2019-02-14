@@ -190,6 +190,7 @@ namespace Actividad2
             // PictureBrute
             // 
             this.PictureBrute.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(10)))), ((int)(((byte)(10)))), ((int)(((byte)(10)))));
+            this.PictureBrute.Cursor = System.Windows.Forms.Cursors.Hand;
             this.PictureBrute.ImageLocation = "C:\\Users\\Usuario\\Documents\\Programas C#\\Actividades Anaya\\Actividad2\\Actividad2\\b" +
     "in\\Debug\\2-2.png";
             this.PictureBrute.Location = new System.Drawing.Point(535, 0);
@@ -202,6 +203,7 @@ namespace Actividad2
             // PictureDivide
             // 
             this.PictureDivide.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(10)))), ((int)(((byte)(10)))), ((int)(((byte)(10)))));
+            this.PictureDivide.Cursor = System.Windows.Forms.Cursors.Hand;
             this.PictureDivide.ImageLocation = "C:\\Users\\Usuario\\Documents\\Programas C#\\Actividades Anaya\\Actividad2\\Actividad2\\b" +
     "in\\Debug\\2-2.png";
             this.PictureDivide.Location = new System.Drawing.Point(39, 0);
