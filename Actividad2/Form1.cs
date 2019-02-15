@@ -302,9 +302,13 @@ namespace Actividad2
                     }
                         
                 }
+            }
+            foreach(vertice v in this.Circs)
+            {
                 v.PaintLines(bitmap, Color.LimeGreen);
             }
             this.Original = (Bitmap)this.PictureBrute.Image.Clone();
+            this.PictureDivide.Image = (Bitmap)this.Original.Clone();
             this.AddCrosses(bitmap);
 
 
@@ -432,9 +436,9 @@ namespace Actividad2
             }
             if (dy == 0)
             {
-                if(dy > 0)
+                if(dx > 0)
                 {
-                    for (int k = x1; k <= x1; k++)
+                    for (int k = x0; k <= x1; k++)
                     {
                         if (new ColorRGB(bitmap.GetPixel(k, y0)).Get_RGB() != "255,255,255" && !this.iSelf(k, y0) && !other.iSelf(k, y0))
                         {
