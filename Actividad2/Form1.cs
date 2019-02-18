@@ -142,7 +142,7 @@ namespace Actividad2
 
         private void SaveBTN_Click(object sender, EventArgs e)
         {
-            this.PictureDivide.Image.Save(this.SaveTextBox.Text);
+            this.PictureBrute.Image.Save(this.SaveTextBox.Text);
         }
 
         #endregion </Comportamiento>
@@ -292,13 +292,23 @@ namespace Actividad2
 
         private void Unir(Bitmap bitmap)
         {
+            Arista min = null, actual = null;
             foreach(vertice v in this.Circs)
             {
                 foreach(vertice other in this.Circs)
                 {
                     if (v != other)
                     {
-                        v.Bresenham_Line(bitmap, other);
+                        actual = v.DDA_Line(bitmap, other);
+                        if (actual != null)
+                        {
+                            min = (min == null) ? actual : min;
+                            //MessageBox.Show($"{actual} -> Len:({actual.Len()}) ; {min} -> Len:({min.Len()})");
+                            if (actual.Len() < min.Len())
+                            {
+                                min = actual;
+                            }
+                        }
                     }
                         
                 }
@@ -307,6 +317,7 @@ namespace Actividad2
             {
                 v.PaintLines(bitmap, Color.LimeGreen);
             }
+            min.SetColors(Color.Orange, bitmap, true);
             this.Original = (Bitmap)this.PictureBrute.Image.Clone();
             this.PictureDivide.Image = (Bitmap)this.Original.Clone();
             this.AddCrosses(bitmap);
@@ -358,6 +369,48 @@ namespace Actividad2
 
     }
 
+    internal class Arista
+    {
+        List<int[]> points;
+        vertice pA, pB;
+        string name;
+        bool painted;
+
+        public Arista(List<int[]> points,vertice pA,vertice pB)
+        {
+            this.points = points;
+            this.pA = pA;
+            this.pB = pB;
+            this.name = $"({pA.getName()},{pB.getName()})";
+            this.painted = false;
+        }
+
+        public override string ToString()
+        {
+            return this.name;
+        }
+
+        public int Len()
+        {
+            return this.points.Count;
+        }
+
+
+        public void SetColors(Color color,Bitmap bitmap, bool force = false)
+        {
+            for(int h = 0;h < this.points.Count; h++)
+            {
+                if(painted && !force)
+                {
+                    //TODO: preguntarle a anaya por este error MessageBox.Show("Funciono!");
+                    return;
+                }
+
+                bitmap.SetPixel(this.points[h][0], this.points[h][1], color);
+            }
+            this.painted = true;
+        }
+    }
 
     internal class vertice
     {
@@ -365,16 +418,14 @@ namespace Actividad2
         int radio;
         string name;
         bool visited;
-        List<vertice> vecinos;
-        List<List<int[]>> aristas;
+        Dictionary<vertice,Arista> aristas;
 
         public vertice(string name,int x, int y,int radio)
         {
             this.cords = new int[] { x, y };
             this.name = name;
             this.visited = false;
-            vecinos = new List<vertice>();
-            aristas = new List<List<int[]>>();
+            aristas = new Dictionary<vertice,Arista>();
             this.radio = radio;
         }
 
@@ -388,9 +439,9 @@ namespace Actividad2
             return new vertice(this.name, this.cords[0], this.cords[1], this.radio);
         }
 
-        public List<vertice> GetVecinos()
+        public Dictionary<vertice, Arista> GetVecinos()
         {
-            return this.vecinos;
+            return this.aristas;
         }
 
         public bool iSelf(int x, int y)
@@ -403,15 +454,15 @@ namespace Actividad2
             return false;
         }
 
-        public void Bresenham_Line(Bitmap bitmap, vertice other)
+        public Arista DDA_Line(Bitmap bitmap, vertice other)
         {
 
-            if (this.vecinos.Any(x => x == other))
+            if (this.aristas.ContainsKey(other))
             {
-                  return;
+                  return null;
             }
             Color color = Color.FromArgb(148, 9, 200);
-            List<int[]> Arista = new List<int[]>();
+            List<int[]> arista_points = new List<int[]>();
             int x0 = cords[0], y0 = cords[1], x1 = other.getX(), y1 = other.getY();
             float dx, dy, m;
             int kx = 0, ky = 0;
@@ -428,9 +479,9 @@ namespace Actividad2
                     {
                         if((new ColorRGB(bitmap.GetPixel(x0, k)).Get_RGB() != "255,255,255") && !this.iSelf(x0,k) && !other.iSelf(x0,k))
                         {
-                            return;
+                            return null;
                         }
-                        Arista.Add(new int[] { x0, k });
+                        arista_points.Add(new int[] { x0, k });
                     }
                 }
             }
@@ -442,9 +493,9 @@ namespace Actividad2
                     {
                         if (new ColorRGB(bitmap.GetPixel(k, y0)).Get_RGB() != "255,255,255" && !this.iSelf(k, y0) && !other.iSelf(k, y0))
                         {
-                            return;
+                            return null;
                         }
-                        Arista.Add(new int[]{k, y0});
+                        arista_points.Add(new int[]{k, y0});
                     }
                 }
             }
@@ -456,6 +507,9 @@ namespace Actividad2
 
                 y0 = y1;
                 y1 = (int)iny;
+
+                dx = x1 - x0;
+                dy = y1 - y0;
             }
             if(Math.Abs(dx) > Math.Abs(dy))
             {
@@ -474,9 +528,9 @@ namespace Actividad2
                         }
                         if (new ColorRGB(bitmap.GetPixel(x0 + kx,y0 + ky)).Get_RGB() != "255,255,255" && !this.iSelf(x0 + kx, y0 + ky) && !other.iSelf(x0 + kx, y0 + ky))
                         {
-                            return;
+                            return null;
                         }
-                        Arista.Add(new int[] {x0 + kx, y0 + ky}); 
+                        arista_points.Add(new int[] {x0 + kx, y0 + ky}); 
                     }
                 }
                 else
@@ -494,9 +548,9 @@ namespace Actividad2
                         }
                         if (new ColorRGB(bitmap.GetPixel(x0 + kx, y0 + ky)).Get_RGB() != "255,255,255" && !this.iSelf(x0 + kx, y0 + ky) && !other.iSelf(x0 + kx, y0 + ky))
                         {
-                            return;
+                            return null;
                         }
-                        Arista.Add(new int[] { x0 + kx, y0 + ky });
+                        arista_points.Add(new int[] { x0 + kx, y0 + ky });
                     }
                 }
             }
@@ -517,10 +571,10 @@ namespace Actividad2
                         }
                         if (new ColorRGB(bitmap.GetPixel(x0 + kx, y0 + ky)).Get_RGB() != "255,255,255" && !this.iSelf(x0 + kx, y0 + ky) && !other.iSelf(x0 + kx, y0 + ky))
                         {
-                            return;
+                            return null;
                         }
 
-                        Arista.Add(new int[] { x0 + kx, y0 + ky });
+                        arista_points.Add(new int[] { x0 + kx, y0 + ky });
                     }
                 }
 
@@ -538,28 +592,28 @@ namespace Actividad2
                         }
                         if (new ColorRGB(bitmap.GetPixel(x0 - kx, y0 + ky)).Get_RGB() != "255,255,255" && !this.iSelf(x0 - kx, y0 + ky) && !other.iSelf(x0 - kx, y0 + ky))
                         {
-                            return;
+                            return null;
                         }
-                        Arista.Add(new int[] { x0 - kx, y0 + ky });
+                        arista_points.Add(new int[] { x0 - kx, y0 + ky });
                     }
                 }
             }
-            this.vecinos.Add(other);
-            other.vecinos.Add(this);
-
-            this.aristas.Add(Arista);
-            other.aristas.Add(Arista);
+            if (arista_points.Count() == 0)
+            {
+                return null;
+            }
+            Arista arista = new Arista(arista_points, other, this);
+            this.aristas.Add(other, arista);
+            other.aristas.Add(this,arista);
+            return arista;
         }
 
         public void PaintLines(Bitmap bitmap,Color color)
         {
       
-            foreach (List<int[]> line in this.aristas)
+            foreach (vertice line in this.aristas.Keys)
             {
-                foreach(int[] vector in line)
-                {
-                    bitmap.SetPixel(vector[0], vector[1], color);
-                }
+                this.aristas[line].SetColors(Color.LimeGreen,bitmap);
             }
         }
 
@@ -574,8 +628,9 @@ namespace Actividad2
             while (cola.Count == 0)
             {
                 vertice actual = cola.Dequeue();
-                foreach (vertice v in actual.GetVecinos())
+                foreach (vertice v in actual.GetVecinos().Keys)
                 {
+
                     if (!v.IsVisited())
                     {
                         v.Visit();
@@ -593,7 +648,7 @@ namespace Actividad2
                 vex = this;
             }
             vex.Visit();
-            foreach (vertice v in vex.GetVecinos())
+            foreach (vertice v in vex.GetVecinos().Keys)
             {
                 if (!v.IsVisited())
                 {
