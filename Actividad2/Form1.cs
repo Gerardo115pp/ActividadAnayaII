@@ -299,7 +299,7 @@ namespace Actividad2
                 {
                     if (v != other)
                     {
-                        actual = v.DDA_Line(bitmap, other);
+                        actual = v.Bresenham(bitmap, other);
                         if (actual != null)
                         {
                             min = (min == null) ? actual : min;
@@ -454,151 +454,31 @@ namespace Actividad2
             return false;
         }
 
-        public Arista DDA_Line(Bitmap bitmap, vertice other)
+        public Arista Bresenham(Bitmap bitmap, vertice other)
         {
 
             if (this.aristas.ContainsKey(other))
             {
                   return null;
             }
-            Color color = Color.FromArgb(148, 9, 200);
             List<int[]> arista_points = new List<int[]>();
             int x0 = cords[0], y0 = cords[1], x1 = other.getX(), y1 = other.getY();
-            float dx, dy, m;
-            int kx = 0, ky = 0;
-            float d1, d2, d3;
 
-            dx = x1 - x0;
-            dy = y1 - y0;
+            int dx = Math.Abs(x1 - x0),
+                dy = Math.Abs(y1 - y0);
 
-            if(dx == 0)
+            bool ok;
+
+            if (dx >= dy)
             {
-                if(dy > 0)
-                {
-                    for(int k = y0; k <= y1; k++)
-                    {
-                        if((new ColorRGB(bitmap.GetPixel(x0, k)).Get_RGB() != "255,255,255") && !this.iSelf(x0,k) && !other.iSelf(x0,k))
-                        {
-                            return null;
-                        }
-                        arista_points.Add(new int[] { x0, k });
-                    }
-                }
+                ok = BresenhamX(x0, y0, x1, y1, dy, dx,bitmap, arista_points,other);
             }
-            if (dy == 0)
+            else
             {
-                if(dx > 0)
-                {
-                    for (int k = x0; k <= x1; k++)
-                    {
-                        if (new ColorRGB(bitmap.GetPixel(k, y0)).Get_RGB() != "255,255,255" && !this.iSelf(k, y0) && !other.iSelf(k, y0))
-                        {
-                            return null;
-                        }
-                        arista_points.Add(new int[]{k, y0});
-                    }
-                }
+                ok = BresenhamY(x0, y0, x1, y1, dy, dx, bitmap, arista_points, other);
             }
-            if (dx < 0 && dy < 0 || dx > 0 && dy < 0)
-            {
-                float inx = x0, iny = y0;
-                x0 = x1;
-                x1 = (int)inx;
 
-                y0 = y1;
-                y1 = (int)iny;
-
-                dx = x1 - x0;
-                dy = y1 - y0;
-            }
-            if(Math.Abs(dx) > Math.Abs(dy))
-            {
-                m = dy / dx;
-
-                if(m > 0)
-                {
-                    for(kx = 1; kx < dx; kx++)
-                    {
-                        d1 = m * kx - ky;
-                        d2 = (ky + 1) - m * kx;
-                        d3 = d1 - d2;
-                        if(d3 > 0)
-                        {
-                            ky++;
-                        }
-                        if (new ColorRGB(bitmap.GetPixel(x0 + kx,y0 + ky)).Get_RGB() != "255,255,255" && !this.iSelf(x0 + kx, y0 + ky) && !other.iSelf(x0 + kx, y0 + ky))
-                        {
-                            return null;
-                        }
-                        arista_points.Add(new int[] {x0 + kx, y0 + ky}); 
-                    }
-                }
-                else
-                {
-                    for(kx = -1; kx > dx; kx--)
-                    {
-                        d1 = m * kx - ky;
-                        d2 = (ky + 1) - m * kx;
-                        d3 = d1 - d2;
-
-                        if(d3 > 0)
-                        {
-
-                            ky++;
-                        }
-                        if (new ColorRGB(bitmap.GetPixel(x0 + kx, y0 + ky)).Get_RGB() != "255,255,255" && !this.iSelf(x0 + kx, y0 + ky) && !other.iSelf(x0 + kx, y0 + ky))
-                        {
-                            return null;
-                        }
-                        arista_points.Add(new int[] { x0 + kx, y0 + ky });
-                    }
-                }
-            }
-            else if(Math.Abs(dy) > Math.Abs(dx))
-            {
-                m = dx / dy;
-                
-                if (m > 0)
-                {
-                    for(ky = 1; ky < dy; ky++)
-                    {
-                        d1 = m * ky - kx;
-                        d2 = (kx + 1) - m * ky;
-                        d3 = d1 - d2;
-                        if (d3 > 0)
-                        {
-                            kx++;
-                        }
-                        if (new ColorRGB(bitmap.GetPixel(x0 + kx, y0 + ky)).Get_RGB() != "255,255,255" && !this.iSelf(x0 + kx, y0 + ky) && !other.iSelf(x0 + kx, y0 + ky))
-                        {
-                            return null;
-                        }
-
-                        arista_points.Add(new int[] { x0 + kx, y0 + ky });
-                    }
-                }
-
-                if (m < 0)
-                {
-                    m = Math.Abs(m);
-                    for (ky = 1; ky < dy; ky++)
-                    {
-                        d1 = m * ky - kx;
-                        d2 = (kx + 1) - m * ky;
-                        d3 = d1 - d2;
-                        if(d3 > 0)
-                        {
-                            kx++;
-                        }
-                        if (new ColorRGB(bitmap.GetPixel(x0 - kx, y0 + ky)).Get_RGB() != "255,255,255" && !this.iSelf(x0 - kx, y0 + ky) && !other.iSelf(x0 - kx, y0 + ky))
-                        {
-                            return null;
-                        }
-                        arista_points.Add(new int[] { x0 - kx, y0 + ky });
-                    }
-                }
-            }
-            if (arista_points.Count() == 0)
+            if (!ok)
             {
                 return null;
             }
@@ -607,6 +487,97 @@ namespace Actividad2
             other.aristas.Add(this,arista);
             return arista;
         }
+
+        private bool BresenhamX(int x0, int y0, int x1, int y1, int dy, int dx, Bitmap bitmap, List<int[]> arista, vertice other)
+        {
+            int i = 2 * dy - dx,
+                j = 2 * dy,
+                k = 2 * (dy - dx);
+
+            if (x0 >= x1)
+            {
+                int temp = x1;
+                x1 = x0;
+                x0 = temp;
+
+                temp = y1;
+                y1 = y0;
+                y0 = temp;
+            }
+            arista.Add(new int[] { x0, y0 });
+            while(x0 < x1)
+            {
+                if (i < 0)
+                {
+                    i += j;
+                }
+                else
+                {
+                    if (y0 < y1)
+                    {
+                        ++y0;
+                    }
+                    else
+                    {
+                        --y0;
+                    }
+                    i += k;
+                }
+                ++x0;
+                if (new ColorRGB(bitmap.GetPixel(x0, y0)).Get_RGB() != "255,255,255" && !this.iSelf(x0, y0) && !(other.iSelf(x0, y0)))
+                {
+                    return false;
+                }
+                arista.Add(new int[] { x0, y0 });
+            }
+            return true;
+        }
+
+        private bool BresenhamY(int x0, int y0, int x1, int y1, int dy, int dx, Bitmap bitmap, List<int[]> arista, vertice other)
+        {
+            int i = 2 * dx - dy,
+                j = 2 * dx,
+                k = 2 * (dx - dy);
+
+            if (y0 >= y1)
+            {
+                int temp = x1;
+                x1 = x0;
+                x0 = temp;
+
+                temp = y1;
+                y1 = y0;
+                y0 = temp;
+            }
+            arista.Add(new int[] { x0, y0 });
+            while (y0 < y1)
+            {
+                if (i < 0)
+                {
+                    i += j;
+                }
+                else
+                {
+                    if (x0 < x1)
+                    {
+                        ++x0;
+                    }
+                    else
+                    {
+                        --x0;
+                    }
+                    i += k;
+                }
+                ++y0;
+                if (new ColorRGB(bitmap.GetPixel(x0, y0)).Get_RGB() != "255,255,255" && !this.iSelf(x0, y0) && !(other.iSelf(x0, y0)))
+                {
+                    return false;
+                }
+                arista.Add(new int[] { x0, y0 });
+            }
+            return true;
+        }
+
 
         public void PaintLines(Bitmap bitmap,Color color)
         {
