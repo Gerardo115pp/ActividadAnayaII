@@ -212,6 +212,7 @@ namespace Actividad2
             this.PictureDivide.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.PictureDivide.TabIndex = 1;
             this.PictureDivide.TabStop = false;
+            this.PictureDivide.Click += new System.EventHandler(this.PictureDivide_Click);
             // 
             // AnalizarBTN
             // 

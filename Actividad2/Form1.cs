@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
@@ -123,6 +124,11 @@ namespace Actividad2
 
         private void ArbolLbl_Click(object sender, EventArgs e)
         {
+            if(this.Circs.Count > 0)
+            {
+                Arbol_From arbol = new Arbol_From(this.Circs);
+                arbol.Show();
+            }
 
         }
 
@@ -289,26 +295,51 @@ namespace Actividad2
 
         #region <Fuerza Bruta>
 
+        private ArrayList get_min(vertice p1, vertice p2)
+        {
+            ArrayList arista = new ArrayList();
+            arista.Add(p1);
+            arista.Add(p2);
+            int dx = p2.getX() - p1.getX(),
+                dy = p2.getY() - p1.getY();
+            if (dx != 0 && dy != 0)
+            {
+                arista.Add(Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2)));
+            }
+            else if ( dx == 0)
+            {
+                arista.Add(Math.Abs(dy));
+            }
+            else
+            {
+                arista.Add(Math.Abs(dx));
+            }
+
+            return arista;
+        }
 
         private void Unir(Bitmap bitmap)
         {
-            Arista min = null, actual = null;
+            ArrayList min = null,
+                      actual = new ArrayList();
             foreach(vertice v in this.Circs)
             {
                 foreach(vertice other in this.Circs)
                 {
                     if (v != other)
                     {
-                        actual = v.Bresenham(bitmap, other);
-                        if (actual != null)
+                        v.Bresenham(bitmap, other);
+                        actual = this.get_min(v, other);
+                        if (min != null)
                         {
-                            min = (min == null) ? actual : min;
-                            //MessageBox.Show($"{actual} -> Len:({actual.Len()}) ; {min} -> Len:({min.Len()})");
-                            if (actual.Len() < min.Len())
-                            {
-                                min = actual;
-                            }
+                            min = (Convert.ToInt32(actual[2]) < Convert.ToInt32(min[2])) ? actual : min;
                         }
+                        else
+                        {
+                            min = actual;
+                        }
+
+                      
                     }
                         
                 }
@@ -317,7 +348,11 @@ namespace Actividad2
             {
                 v.PaintLines(bitmap, Color.LimeGreen);
             }
-            min.SetColors(Color.Orange, bitmap, true);
+            if (min != null)
+            {
+                Graphics.FromImage(bitmap).DrawLine(new Pen(new SolidBrush(Color.Orange)),((vertice)min[0]).GetPoint(),((vertice)min[1]).GetPoint());
+            }
+
             this.Original = (Bitmap)this.PictureBrute.Image.Clone();
             this.PictureDivide.Image = (Bitmap)this.Original.Clone();
             this.AddCrosses(bitmap);
@@ -330,7 +365,10 @@ namespace Actividad2
 
         #endregion </Script>
 
+        private void PictureDivide_Click(object sender, EventArgs e)
+        {
 
+        }
     }
 
     public class ColorRGB
@@ -369,7 +407,7 @@ namespace Actividad2
 
     }
 
-    internal class Arista
+    public class Arista
     {
         List<int[]> points;
         vertice pA, pB;
@@ -412,7 +450,7 @@ namespace Actividad2
         }
     }
 
-    internal class vertice
+    public class vertice
     {
         int[] cords;
         int radio;
@@ -454,12 +492,12 @@ namespace Actividad2
             return false;
         }
 
-        public Arista Bresenham(Bitmap bitmap, vertice other)
+        public void Bresenham(Bitmap bitmap, vertice other, bool force=false)
         {
 
             if (this.aristas.ContainsKey(other))
             {
-                  return null;
+                  return;
             }
             List<int[]> arista_points = new List<int[]>();
             int x0 = cords[0], y0 = cords[1], x1 = other.getX(), y1 = other.getY();
@@ -480,17 +518,17 @@ namespace Actividad2
 
             if (!ok)
             {
-                return null;
+                return;
             }
             Arista arista = new Arista(arista_points, other, this);
             this.aristas.Add(other, arista);
             other.aristas.Add(this,arista);
-            return arista;
+            return;
         }
 
         private bool BresenhamX(int x0, int y0, int x1, int y1, int dy, int dx, Bitmap bitmap, List<int[]> arista, vertice other)
         {
-            int i = 2 * dy - dx,
+            int e = 2 * dy - dx,
                 j = 2 * dy,
                 k = 2 * (dy - dx);
 
@@ -507,9 +545,9 @@ namespace Actividad2
             arista.Add(new int[] { x0, y0 });
             while(x0 < x1)
             {
-                if (i < 0)
+                if (e < 0)
                 {
-                    i += j;
+                    e += j;
                 }
                 else
                 {
@@ -521,7 +559,7 @@ namespace Actividad2
                     {
                         --y0;
                     }
-                    i += k;
+                    e += k;
                 }
                 ++x0;
                 if (new ColorRGB(bitmap.GetPixel(x0, y0)).Get_RGB() != "255,255,255" && !this.iSelf(x0, y0) && !(other.iSelf(x0, y0)))
@@ -535,7 +573,7 @@ namespace Actividad2
 
         private bool BresenhamY(int x0, int y0, int x1, int y1, int dy, int dx, Bitmap bitmap, List<int[]> arista, vertice other)
         {
-            int i = 2 * dx - dy,
+            int e = 2 * dx - dy,
                 j = 2 * dx,
                 k = 2 * (dx - dy);
 
@@ -552,9 +590,9 @@ namespace Actividad2
             arista.Add(new int[] { x0, y0 });
             while (y0 < y1)
             {
-                if (i < 0)
+                if (e < 0)
                 {
-                    i += j;
+                    e += j;
                 }
                 else
                 {
@@ -566,7 +604,7 @@ namespace Actividad2
                     {
                         --x0;
                     }
-                    i += k;
+                    e += k;
                 }
                 ++y0;
                 if (new ColorRGB(bitmap.GetPixel(x0, y0)).Get_RGB() != "255,255,255" && !this.iSelf(x0, y0) && !(other.iSelf(x0, y0)))
@@ -577,7 +615,6 @@ namespace Actividad2
             }
             return true;
         }
-
 
         public void PaintLines(Bitmap bitmap,Color color)
         {
@@ -626,6 +663,11 @@ namespace Actividad2
                     this.depth(v);
                 }
             }
+        }
+        
+        public Point GetPoint()
+        {
+            return new Point(this.cords[0], this.cords[1]);
         }
 
         public bool IsVisited()
