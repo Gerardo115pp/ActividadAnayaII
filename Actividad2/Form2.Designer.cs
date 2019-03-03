@@ -28,11 +28,12 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Arbol_From));
             this.Arbol_Controls = new System.Windows.Forms.Panel();
+            this.ArbolLABEL = new System.Windows.Forms.Label();
             this.CloseArbolBTN = new System.Windows.Forms.Button();
             this.Arbolbody = new System.Windows.Forms.Panel();
             this.TreeView = new System.Windows.Forms.TreeView();
-            this.ArbolLABEL = new System.Windows.Forms.Label();
             this.Arbol_Controls.SuspendLayout();
             this.Arbolbody.SuspendLayout();
             this.SuspendLayout();
@@ -52,6 +53,16 @@
             this.Arbol_Controls.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Arbol_Controls_MouseDown);
             this.Arbol_Controls.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Arbol_Controls_MouseMove);
             this.Arbol_Controls.MouseUp += new System.Windows.Forms.MouseEventHandler(this.Arbol_Controls_MouseUp);
+            // 
+            // ArbolLABEL
+            // 
+            this.ArbolLABEL.AutoSize = true;
+            this.ArbolLABEL.Font = new System.Drawing.Font("Russian Dollmaker", 33.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ArbolLABEL.Location = new System.Drawing.Point(210, 12);
+            this.ArbolLABEL.Name = "ArbolLABEL";
+            this.ArbolLABEL.Size = new System.Drawing.Size(86, 32);
+            this.ArbolLABEL.TabIndex = 1;
+            this.ArbolLABEL.Text = "Grafo";
             // 
             // CloseArbolBTN
             // 
@@ -90,16 +101,6 @@
             this.TreeView.Size = new System.Drawing.Size(336, 331);
             this.TreeView.TabIndex = 0;
             // 
-            // ArbolLABEL
-            // 
-            this.ArbolLABEL.AutoSize = true;
-            this.ArbolLABEL.Font = new System.Drawing.Font("Russian", 23F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ArbolLABEL.Location = new System.Drawing.Point(207, 9);
-            this.ArbolLABEL.Name = "ArbolLABEL";
-            this.ArbolLABEL.Size = new System.Drawing.Size(95, 35);
-            this.ArbolLABEL.TabIndex = 1;
-            this.ArbolLABEL.Text = "Arbol";
-            // 
             // Arbol_From
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -110,12 +111,13 @@
             this.Controls.Add(this.Arbolbody);
             this.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(138)))), ((int)(((byte)(219)))), ((int)(((byte)(8)))));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximumSize = new System.Drawing.Size(529, 450);
             this.MinimumSize = new System.Drawing.Size(529, 450);
             this.Name = "Arbol_From";
             this.Opacity = 0.95D;
             this.ShowInTaskbar = false;
-            this.Text = "Arbol";
+            this.Text = "Grafo";
             this.Arbol_Controls.ResumeLayout(false);
             this.Arbol_Controls.PerformLayout();
             this.Arbolbody.ResumeLayout(false);

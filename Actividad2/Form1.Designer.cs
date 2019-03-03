@@ -332,12 +332,12 @@ namespace Actividad2
             // 
             this.ArbolLbl.AutoSize = true;
             this.ArbolLbl.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.ArbolLbl.Font = new System.Drawing.Font("Russian", 26.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ArbolLbl.Location = new System.Drawing.Point(1161, 423);
+            this.ArbolLbl.Font = new System.Drawing.Font("Russian Dollmaker", 33.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ArbolLbl.Location = new System.Drawing.Point(1168, 429);
             this.ArbolLbl.Name = "ArbolLbl";
-            this.ArbolLbl.Size = new System.Drawing.Size(159, 40);
+            this.ArbolLbl.Size = new System.Drawing.Size(134, 32);
             this.ArbolLbl.TabIndex = 7;
-            this.ArbolLbl.Text = "Ver Arbol";
+            this.ArbolLbl.Text = "Ver Grafo";
             this.ArbolLbl.Click += new System.EventHandler(this.ArbolLbl_Click);
             this.ArbolLbl.MouseEnter += new System.EventHandler(this.ArbolLbl_MouseEnter);
             this.ArbolLbl.MouseLeave += new System.EventHandler(this.ArbolLbl_MouseLeave);

@@ -284,7 +284,7 @@ namespace Actividad2
                     else
                     {
                         insidec = false;
-                    }
+                    }//\".+\"$
                 }
             }
             PictureDivide.Image = bitmap;
@@ -321,14 +321,19 @@ namespace Actividad2
         private void Unir(Bitmap bitmap)
         {
             ArrayList min = null,
-                      actual = new ArrayList();
+                      actual = new ArrayList(),
+                      block_min = null,
+                      block_act = new ArrayList();
+
+            bool ok;
             foreach(vertice v in this.Circs)
             {
                 foreach(vertice other in this.Circs)
                 {
                     if (v != other)
                     {
-                        v.Bresenham(bitmap, other);
+                        
+                        ok = v.Bresenham(bitmap, other);
                         actual = this.get_min(v, other);
                         if (min != null)
                         {
@@ -338,10 +343,19 @@ namespace Actividad2
                         {
                             min = actual;
                         }
-
-                      
-                    }
-                        
+                        if (ok)
+                        {
+                            block_act = this.get_min(v, other);
+                            if(block_min != null)
+                            {
+                                block_min = (Convert.ToInt32(block_act[2]) < Convert.ToInt32(block_min[2])) ? block_act : block_min;
+                            }
+                            else
+                            {
+                                block_min = block_act;
+                            }
+                        }
+                    }                        
                 }
             }
             foreach(vertice v in this.Circs)
@@ -351,6 +365,13 @@ namespace Actividad2
             if (min != null)
             {
                 Graphics.FromImage(bitmap).DrawLine(new Pen(new SolidBrush(Color.Orange)),((vertice)min[0]).GetPoint(),((vertice)min[1]).GetPoint());
+                this.CirculosListBox.Items.Add($"Circulos mas crecanos sin bloqueo: {((vertice)min[0]).getName()} y {((vertice) min[1]).getName()}");
+
+            }
+            if (block_min != null)
+            {
+                Graphics.FromImage(bitmap).DrawLine(new Pen(new SolidBrush(Color.Purple)), ((vertice)block_min[0]).GetPoint(), ((vertice)block_min[1]).GetPoint());
+                this.CirculosListBox.Items.Add($"Circulos mas crecanos con bloqueo: {((vertice)block_min[0]).getName()} y {((vertice)block_min[1]).getName()}");
             }
 
             this.Original = (Bitmap)this.PictureBrute.Image.Clone();
@@ -484,7 +505,6 @@ namespace Actividad2
 
         public bool iSelf(int x, int y)
         {
-
             if (((Math.Pow((this.cords[0] - x), 2) + (Math.Pow((this.cords[1] - y), 2))) - Math.Pow(this.GetRadio() + 5, 2)) <= 0)
             {
                 return true;
@@ -492,12 +512,12 @@ namespace Actividad2
             return false;
         }
 
-        public void Bresenham(Bitmap bitmap, vertice other, bool force=false)
+        public bool Bresenham(Bitmap bitmap, vertice other)
         {
 
             if (this.aristas.ContainsKey(other))
             {
-                  return;
+                  return false;
             }
             List<int[]> arista_points = new List<int[]>();
             int x0 = cords[0], y0 = cords[1], x1 = other.getX(), y1 = other.getY();
@@ -518,17 +538,17 @@ namespace Actividad2
 
             if (!ok)
             {
-                return;
+                return false;//nuevo
             }
             Arista arista = new Arista(arista_points, other, this);
             this.aristas.Add(other, arista);
             other.aristas.Add(this,arista);
-            return;
+            return true;//nuevo
         }
 
         private bool BresenhamX(int x0, int y0, int x1, int y1, int dy, int dx, Bitmap bitmap, List<int[]> arista, vertice other)
         {
-            int e = 2 * dy - dx,
+            int error = 2 * dy - dx,
                 j = 2 * dy,
                 k = 2 * (dy - dx);
 
@@ -545,23 +565,23 @@ namespace Actividad2
             arista.Add(new int[] { x0, y0 });
             while(x0 < x1)
             {
-                if (e < 0)
+                if (error < 0)
                 {
-                    e += j;
+                    error += j;
                 }
                 else
                 {
                     if (y0 < y1)
                     {
-                        ++y0;
+                        y0++;
                     }
                     else
                     {
-                        --y0;
+                        y0--;
                     }
-                    e += k;
+                    error += k;
                 }
-                ++x0;
+                x0++;
                 if (new ColorRGB(bitmap.GetPixel(x0, y0)).Get_RGB() != "255,255,255" && !this.iSelf(x0, y0) && !(other.iSelf(x0, y0)))
                 {
                     return false;
@@ -573,7 +593,7 @@ namespace Actividad2
 
         private bool BresenhamY(int x0, int y0, int x1, int y1, int dy, int dx, Bitmap bitmap, List<int[]> arista, vertice other)
         {
-            int e = 2 * dx - dy,
+            int error = 2 * dx - dy,
                 j = 2 * dx,
                 k = 2 * (dx - dy);
 
@@ -590,23 +610,23 @@ namespace Actividad2
             arista.Add(new int[] { x0, y0 });
             while (y0 < y1)
             {
-                if (e < 0)
+                if (error < 0)
                 {
-                    e += j;
+                    error += j;
                 }
                 else
                 {
                     if (x0 < x1)
                     {
-                        ++x0;
+                        x0++;
                     }
                     else
                     {
-                        --x0;
+                        x0--;
                     }
-                    e += k;
+                    error += k;
                 }
-                ++y0;
+                y0++;
                 if (new ColorRGB(bitmap.GetPixel(x0, y0)).Get_RGB() != "255,255,255" && !this.iSelf(x0, y0) && !(other.iSelf(x0, y0)))
                 {
                     return false;
