@@ -13,11 +13,13 @@ namespace Actividad2
 {
     public partial class MainWindow : Form
     {
-        private bool dragging = false;
+        private bool dragging = false,
+                     IsJoined = false;
         private Point dragCursorPoint;
         private Point dragFormPoint;
         private List<vertice> Circs;
         private Bitmap Original;
+        private List<Agente> Agentes = new List<Agente>();
 
 
         public MainWindow()
@@ -139,16 +141,38 @@ namespace Actividad2
             {
                 this.PictureDivide.Image = new Bitmap(fileDialog.FileName);
                 this.PictureBrute.Image = (Bitmap)this.PictureDivide.Image.Clone();
+                this.PictureDivide.BackgroundImage = this.PictureDivide.Image;
+                this.PictureBrute.BackgroundImage = this.PictureBrute.Image;
                 this.BrutaStatus.ForeColor = Color.Red;
                 this.DivideStatus.ForeColor = Color.Red;
                 this.Circs.Clear();
                 this.CirculosListBox.Items.Clear();
+                this.IsJoined = false;
             }
         }
 
         private void SaveBTN_Click(object sender, EventArgs e)
         {
             this.PictureBrute.Image.Save(this.SaveTextBox.Text);
+        }
+
+        private void BTN_Agentes_ButtonClick(object sender, EventArgs e)
+        {
+
+            if (this.IsJoined)
+            {
+                Point cords = this.Circs[0].GetPoint();
+                Agentes.Add(new Agente(cords));
+                Controls.Add(Agentes[0].GetPictureBox());
+                Agentes[0].GetPictureBox().Visible = true;
+                Agentes[0].GetPictureBox().BringToFront();
+                Agentes[0].GetPictureBox().Parent = this.PictureDivide;
+                Agentes[0].GetPictureBox().BackColor = Color.Transparent;
+            }
+            else
+            {
+                MessageBox.Show($"Bitmap: {this.PictureBrute.Image.PhysicalDimension.ToPointF().X} | Picture: {this.PictureDivide.Width}");
+            }
         }
 
         #endregion </Comportamiento>
@@ -320,41 +344,15 @@ namespace Actividad2
 
         private void Unir(Bitmap bitmap)
         {
-            ArrayList min = null,
-                      actual = new ArrayList(),
-                      block_min = null,
-                      block_act = new ArrayList();
 
-            bool ok;
+
             foreach(vertice v in this.Circs)
             {
                 foreach(vertice other in this.Circs)
                 {
                     if (v != other)
-                    {
-                        
-                        ok = v.Bresenham(bitmap, other);
-                        actual = this.get_min(v, other);
-                        if (min != null)
-                        {
-                            min = (Convert.ToInt32(actual[2]) < Convert.ToInt32(min[2])) ? actual : min;
-                        }
-                        else
-                        {
-                            min = actual;
-                        }
-                        if (ok)
-                        {
-                            block_act = this.get_min(v, other);
-                            if(block_min != null)
-                            {
-                                block_min = (Convert.ToInt32(block_act[2]) < Convert.ToInt32(block_min[2])) ? block_act : block_min;
-                            }
-                            else
-                            {
-                                block_min = block_act;
-                            }
-                        }
+                    {                       
+                        v.Bresenham(bitmap, other);
                     }                        
                 }
             }
@@ -362,22 +360,11 @@ namespace Actividad2
             {
                 v.PaintLines(bitmap, Color.LimeGreen);
             }
-            if (min != null)
-            {
-                Graphics.FromImage(bitmap).DrawLine(new Pen(new SolidBrush(Color.Orange)),((vertice)min[0]).GetPoint(),((vertice)min[1]).GetPoint());
-                this.CirculosListBox.Items.Add($"Circulos mas crecanos sin bloqueo: {((vertice)min[0]).getName()} y {((vertice) min[1]).getName()}");
-
-            }
-            if (block_min != null)
-            {
-                Graphics.FromImage(bitmap).DrawLine(new Pen(new SolidBrush(Color.Purple)), ((vertice)block_min[0]).GetPoint(), ((vertice)block_min[1]).GetPoint());
-                this.CirculosListBox.Items.Add($"Circulos mas crecanos con bloqueo: {((vertice)block_min[0]).getName()} y {((vertice)block_min[1]).getName()}");
-            }
 
             this.Original = (Bitmap)this.PictureBrute.Image.Clone();
             this.PictureDivide.Image = (Bitmap)this.Original.Clone();
             this.AddCrosses(bitmap);
-
+            this.IsJoined = true;
 
         }
 
@@ -385,6 +372,8 @@ namespace Actividad2
         #endregion </Fuerza Bruta>
 
         #endregion </Script>
+
+        
 
         private void PictureDivide_Click(object sender, EventArgs e)
         {
@@ -725,5 +714,29 @@ namespace Actividad2
             return this.radio;
         }
 
+    }
+
+    public class Agente
+    {
+        PictureBox sprite;
+
+        public Agente(Point Cords)
+        {
+            this.sprite = new PictureBox();
+            this.config_sprite(Cords);
+        }
+
+        private void config_sprite(Point C)
+        {
+            this.sprite.Height = 30;
+            this.sprite.Width = 30;
+            this.sprite.SizeMode = PictureBoxSizeMode.Zoom;
+            this.sprite.Image = Image.FromFile(@"C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\imgs\Agentes.png");
+        }
+        
+        public PictureBox GetPictureBox()
+        {
+            return this.sprite;
+        }
     }
 }

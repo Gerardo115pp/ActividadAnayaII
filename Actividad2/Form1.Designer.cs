@@ -38,8 +38,8 @@ namespace Actividad2
             this.PicturePanel = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
             this.DivdeLabel = new System.Windows.Forms.Label();
-            this.PictureBrute = new System.Windows.Forms.PictureBox();
             this.PictureDivide = new System.Windows.Forms.PictureBox();
+            this.PictureBrute = new System.Windows.Forms.PictureBox();
             this.AnalizarBTN = new System.Windows.Forms.Button();
             this.SaveGroupBox = new System.Windows.Forms.GroupBox();
             this.EnumCheckBox = new System.Windows.Forms.CheckBox();
@@ -54,10 +54,12 @@ namespace Actividad2
             this.FolderLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.DivideStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.BrutaStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            this.BTN_Agentes = new System.Windows.Forms.ToolStripSplitButton();
+            this.CantidadDeAgentesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ControlPanel.SuspendLayout();
             this.PicturePanel.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.PictureBrute)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.PictureDivide)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PictureBrute)).BeginInit();
             this.SaveGroupBox.SuspendLayout();
             this.CircLabelContainer.SuspendLayout();
             this.UselessStatus.SuspendLayout();
@@ -157,8 +159,8 @@ namespace Actividad2
             this.PicturePanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
             this.PicturePanel.Controls.Add(this.label1);
             this.PicturePanel.Controls.Add(this.DivdeLabel);
-            this.PicturePanel.Controls.Add(this.PictureBrute);
             this.PicturePanel.Controls.Add(this.PictureDivide);
+            this.PicturePanel.Controls.Add(this.PictureBrute);
             this.PicturePanel.Location = new System.Drawing.Point(16, 63);
             this.PicturePanel.Margin = new System.Windows.Forms.Padding(30);
             this.PicturePanel.Name = "PicturePanel";
@@ -181,28 +183,17 @@ namespace Actividad2
             this.DivdeLabel.AutoSize = true;
             this.DivdeLabel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(10)))), ((int)(((byte)(10)))), ((int)(((byte)(10)))));
             this.DivdeLabel.Font = new System.Drawing.Font("Russian Dollmaker", 43F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.DivdeLabel.Location = new System.Drawing.Point(248, 53);
+            this.DivdeLabel.Location = new System.Drawing.Point(235, 54);
             this.DivdeLabel.Name = "DivdeLabel";
             this.DivdeLabel.Size = new System.Drawing.Size(107, 41);
             this.DivdeLabel.TabIndex = 2;
             this.DivdeLabel.Text = "Divide";
             // 
-            // PictureBrute
-            // 
-            this.PictureBrute.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(10)))), ((int)(((byte)(10)))), ((int)(((byte)(10)))));
-            this.PictureBrute.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.PictureBrute.ImageLocation = "C:\\Users\\Usuario\\Documents\\Programas C#\\Actividades Anaya\\Actividad2\\Actividad2\\b" +
-    "in\\Debug\\2-2.png";
-            this.PictureBrute.Location = new System.Drawing.Point(535, 0);
-            this.PictureBrute.Name = "PictureBrute";
-            this.PictureBrute.Size = new System.Drawing.Size(495, 626);
-            this.PictureBrute.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.PictureBrute.TabIndex = 0;
-            this.PictureBrute.TabStop = false;
-            // 
             // PictureDivide
             // 
             this.PictureDivide.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(10)))), ((int)(((byte)(10)))), ((int)(((byte)(10)))));
+            this.PictureDivide.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("PictureDivide.BackgroundImage")));
+            this.PictureDivide.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.PictureDivide.Cursor = System.Windows.Forms.Cursors.Hand;
             this.PictureDivide.ImageLocation = "C:\\Users\\Usuario\\Documents\\Programas C#\\Actividades Anaya\\Actividad2\\Actividad2\\b" +
     "in\\Debug\\2-2.png";
@@ -213,6 +204,21 @@ namespace Actividad2
             this.PictureDivide.TabIndex = 1;
             this.PictureDivide.TabStop = false;
             this.PictureDivide.Click += new System.EventHandler(this.PictureDivide_Click);
+            // 
+            // PictureBrute
+            // 
+            this.PictureBrute.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(10)))), ((int)(((byte)(10)))), ((int)(((byte)(10)))));
+            this.PictureBrute.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("PictureBrute.BackgroundImage")));
+            this.PictureBrute.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.PictureBrute.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.PictureBrute.ImageLocation = "C:\\Users\\Usuario\\Documents\\Programas C#\\Actividades Anaya\\Actividad2\\Actividad2\\b" +
+    "in\\Debug\\2-2.png";
+            this.PictureBrute.Location = new System.Drawing.Point(535, 0);
+            this.PictureBrute.Name = "PictureBrute";
+            this.PictureBrute.Size = new System.Drawing.Size(495, 626);
+            this.PictureBrute.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.PictureBrute.TabIndex = 0;
+            this.PictureBrute.TabStop = false;
             // 
             // AnalizarBTN
             // 
@@ -350,7 +356,8 @@ namespace Actividad2
             this.TooBien,
             this.FolderLabel,
             this.DivideStatus,
-            this.BrutaStatus});
+            this.BrutaStatus,
+            this.BTN_Agentes});
             this.UselessStatus.Location = new System.Drawing.Point(0, 705);
             this.UselessStatus.Name = "UselessStatus";
             this.UselessStatus.Size = new System.Drawing.Size(1370, 35);
@@ -360,6 +367,7 @@ namespace Actividad2
             // TooBien
             // 
             this.TooBien.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Right;
+            this.TooBien.BorderStyle = System.Windows.Forms.Border3DStyle.RaisedOuter;
             this.TooBien.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.TooBien.Name = "TooBien";
             this.TooBien.Padding = new System.Windows.Forms.Padding(0, 0, 10, 0);
@@ -368,8 +376,10 @@ namespace Actividad2
             // 
             // FolderLabel
             // 
+            this.FolderLabel.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Right;
+            this.FolderLabel.BorderStyle = System.Windows.Forms.Border3DStyle.RaisedOuter;
             this.FolderLabel.Name = "FolderLabel";
-            this.FolderLabel.Size = new System.Drawing.Size(95, 30);
+            this.FolderLabel.Size = new System.Drawing.Size(99, 30);
             this.FolderLabel.Text = "Cambiar Imagen";
             this.FolderLabel.Click += new System.EventHandler(this.FolderLabel_Click);
             this.FolderLabel.MouseEnter += new System.EventHandler(this.FolderLabel_MouseEnter);
@@ -377,26 +387,46 @@ namespace Actividad2
             // 
             // DivideStatus
             // 
-            this.DivideStatus.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Left;
+            this.DivideStatus.BorderStyle = System.Windows.Forms.Border3DStyle.RaisedOuter;
             this.DivideStatus.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.DivideStatus.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.DivideStatus.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(190)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.DivideStatus.Name = "DivideStatus";
             this.DivideStatus.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.DivideStatus.Size = new System.Drawing.Size(131, 30);
+            this.DivideStatus.Size = new System.Drawing.Size(127, 30);
             this.DivideStatus.Text = "Divide y venceras";
             this.DivideStatus.ToolTipText = "Status de la imagen";
             // 
             // BrutaStatus
             // 
+            this.BrutaStatus.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Right;
+            this.BrutaStatus.BorderStyle = System.Windows.Forms.Border3DStyle.RaisedOuter;
             this.BrutaStatus.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.BrutaStatus.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.BrutaStatus.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(190)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.BrutaStatus.Name = "BrutaStatus";
             this.BrutaStatus.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.BrutaStatus.Size = new System.Drawing.Size(93, 30);
+            this.BrutaStatus.Size = new System.Drawing.Size(97, 30);
             this.BrutaStatus.Text = "Fuerza Bruta";
             this.BrutaStatus.ToolTipText = "Status de la imagen";
+            // 
+            // BTN_Agentes
+            // 
+            this.BTN_Agentes.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.CantidadDeAgentesToolStripMenuItem});
+            this.BTN_Agentes.Image = ((System.Drawing.Image)(resources.GetObject("BTN_Agentes.Image")));
+            this.BTN_Agentes.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.BTN_Agentes.Name = "BTN_Agentes";
+            this.BTN_Agentes.Size = new System.Drawing.Size(82, 33);
+            this.BTN_Agentes.Text = "Agentes";
+            this.BTN_Agentes.ButtonClick += new System.EventHandler(this.BTN_Agentes_ButtonClick);
+            // 
+            // CantidadDeAgentesToolStripMenuItem
+            // 
+            this.CantidadDeAgentesToolStripMenuItem.BackColor = System.Drawing.Color.Red;
+            this.CantidadDeAgentesToolStripMenuItem.Name = "CantidadDeAgentesToolStripMenuItem";
+            this.CantidadDeAgentesToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.CantidadDeAgentesToolStripMenuItem.Text = "Cantidad de agentes";
             // 
             // MainWindow
             // 
@@ -424,8 +454,8 @@ namespace Actividad2
             this.ControlPanel.PerformLayout();
             this.PicturePanel.ResumeLayout(false);
             this.PicturePanel.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.PictureBrute)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.PictureDivide)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PictureBrute)).EndInit();
             this.SaveGroupBox.ResumeLayout(false);
             this.SaveGroupBox.PerformLayout();
             this.CircLabelContainer.ResumeLayout(false);
@@ -463,6 +493,8 @@ namespace Actividad2
         private System.Windows.Forms.ToolStripStatusLabel DivideStatus;
         private System.Windows.Forms.ToolStripStatusLabel BrutaStatus;
         private System.Windows.Forms.CheckBox EnumCheckBox;
+        private System.Windows.Forms.ToolStripSplitButton BTN_Agentes;
+        private System.Windows.Forms.ToolStripMenuItem CantidadDeAgentesToolStripMenuItem;
     }
 }
 
