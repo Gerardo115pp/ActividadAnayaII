@@ -112,16 +112,13 @@ namespace Actividad2
 
         private void AnalizarBTN_Click(object sender, EventArgs e)
         {
-            this.Cfind((Bitmap)this.PictureDivide.Image);
-            this.Unir((Bitmap)this.PictureBrute.Image);
-            this.BrutaStatus.ForeColor = Color.Green;
-            this.DivideStatus.ForeColor = Color.Green;
-
-
-
-
-
-
+            if (!IsJoined)
+            {
+                this.Cfind((Bitmap)this.PictureDivide.Image);
+                this.Unir((Bitmap)this.PictureBrute.Image);
+                this.BrutaStatus.ForeColor = Color.Green;
+                this.DivideStatus.ForeColor = Color.Green;
+            }
         }
 
         private void ArbolLbl_Click(object sender, EventArgs e)
@@ -147,6 +144,7 @@ namespace Actividad2
                 this.DivideStatus.ForeColor = Color.Red;
                 this.Circs.Clear();
                 this.CirculosListBox.Items.Clear();
+                this.Agentes.Clear();
                 this.IsJoined = false;
             }
         }
@@ -162,16 +160,9 @@ namespace Actividad2
             if (this.IsJoined)
             {
                 Point cords = this.Circs[0].GetPoint();
-                Agentes.Add(new Agente(cords));
-                Controls.Add(Agentes[0].GetPictureBox());
-                Agentes[0].GetPictureBox().Visible = true;
-                Agentes[0].GetPictureBox().BringToFront();
-                Agentes[0].GetPictureBox().Parent = this.PictureDivide;
-                Agentes[0].GetPictureBox().BackColor = Color.Transparent;
-            }
-            else
-            {
-                MessageBox.Show($"Bitmap: {this.PictureBrute.Image.PhysicalDimension.ToPointF().X} | Picture: {this.PictureDivide.Width}");
+                this.Agentes.Add(new Agente(this.Circs[0], (Bitmap)this.PictureDivide.Image,this.Original,this.PictureDivide));
+                Thread Caminar = new Thread(new ThreadStart(Agentes[0].Recorrer));
+                Caminar.Start();               
             }
         }
 
@@ -443,6 +434,15 @@ namespace Actividad2
             return this.points.Count;
         }
 
+        public vertice Get_Destino(vertice actual)
+        {
+            return (actual == pA) ? pB : pA;
+        }
+
+        public List<int[]> GetPoints()
+        {
+            return this.points;
+        }
 
         public void SetColors(Color color,Bitmap bitmap, bool force = false)
         {
@@ -689,6 +689,11 @@ namespace Actividad2
             this.visited = true;
         }
 
+        public void ResetVisit()
+        {
+            this.visited = false;
+        }
+
         public int[] GetPos()
         {
             return new int[] { cords[0], cords[1] };
@@ -718,25 +723,88 @@ namespace Actividad2
 
     public class Agente
     {
-        PictureBox sprite;
+        static Bitmap sprite = new Bitmap(Image.FromFile(@"C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\imgs\Agentes.png"),new Size(40,40));
+        Bitmap mapa, mapa_limpio;
+        vertice Estacion;
+        PictureBox Box;
+        Point Ubicacion;
 
-        public Agente(Point Cords)
+
+        public Agente(vertice estacion,Bitmap mapa, Bitmap limpio, PictureBox box)
         {
-            this.sprite = new PictureBox();
-            this.config_sprite(Cords);
+            this.mapa = mapa;
+            this.mapa_limpio = limpio;
+            this.Estacion = estacion;
+            this.Ubicacion = estacion.GetPoint();
+            this.Box = box;
+            this.Nacer();
         }
 
-        private void config_sprite(Point C)
+        private void Nacer()
         {
-            this.sprite.Height = 30;
-            this.sprite.Width = 30;
-            this.sprite.SizeMode = PictureBoxSizeMode.Zoom;
-            this.sprite.Image = Image.FromFile(@"C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\imgs\Agentes.png");
+            Graphics graphics = Graphics.FromImage(mapa);
+            graphics.DrawImage(Agente.sprite, (Ubicacion.X - 20), (Ubicacion.Y - 20));
+            this.Update_Box();
+        }
+
+        public Arista Elegir_Camino()
+        {
+            Dictionary<vertice, Arista> opciones = this.Estacion.GetVecinos();
+            int eleccion = new Random().Next(opciones.Count);
+            this.Estacion = opciones.Keys.ToList<vertice>()[eleccion];            
+            return opciones[Estacion];
+        }
+
+        public void Recorrer()
+        {
+            Arista Camino = Elegir_Camino();
+            List<int[]> pasos = Camino.GetPoints();
+            if(Ubicacion == new Point(pasos[0][0], pasos[0][1]))
+            {
+                for(int h = 0; h < (pasos.Count - 11); h += 10)
+                {
+                    Dar_Paso(pasos[h]);
+                }
+                Dar_Paso(Estacion.GetPos());
+            }
+            else if(Ubicacion == new Point(pasos[(pasos.Count-1)][0], pasos[(pasos.Count - 1)][1]))
+            {
+                for(int h = (pasos.Count - 1); h >= 20; h -= 10)
+                {
+                    Dar_Paso(pasos[h]);
+                }
+                Dar_Paso(Estacion.GetPos());
+            }
+            else
+            {
+                MessageBox.Show("Yo no deberia aparecer... que extraño 0.o");
+            }
         }
         
-        public PictureBox GetPictureBox()
+        private void Dar_Paso(int[] pos)
         {
-            return this.sprite;
+            Del_Step();
+            Ubicacion = new Point(pos[0], pos[1]);
+            Nacer();
+            Thread.Sleep(50);
+        }
+
+        private void Del_Step()
+        {
+            for(int y = 0; y < 40; y++)
+            {
+                for(int x = 0; x < 40; x++)
+                {
+                    Color color = this.mapa_limpio.GetPixel((Ubicacion.X - 20)+ x, (Ubicacion.Y - 20) + y);
+                    this.mapa.SetPixel((Ubicacion.X - 20) + x, (Ubicacion.Y - 20) + y, color);
+                }
+            }
+            this.Update_Box();
+        }
+
+        private void Update_Box()
+        {
+            this.Box.Invoke(new Action(() => this.Box.Image = (Bitmap)this.mapa));
         }
     }
 }
