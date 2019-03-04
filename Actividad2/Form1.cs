@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Timers;
 using System.Windows.Forms;
 
 namespace Actividad2
@@ -14,18 +15,22 @@ namespace Actividad2
     public partial class MainWindow : Form
     {
         private bool dragging = false,
-                     IsJoined = false;
+                     IsJoined = false,
+                     updating = false;
         private Point dragCursorPoint;
         private Point dragFormPoint;
         private List<vertice> Circs;
         private Bitmap Original;
         private List<Agente> Agentes = new List<Agente>();
+        private List<Thread> threads = new List<Thread>();
 
+        private System.Timers.Timer Update_agentes;
 
         public MainWindow()
         {
             InitializeComponent();
             this.Circs = new List<vertice>();
+            Thread.CurrentThread.Name = "Proceso principal";
         }
 
         #region <Frontend>
@@ -145,6 +150,8 @@ namespace Actividad2
                 this.Circs.Clear();
                 this.CirculosListBox.Items.Clear();
                 this.Agentes.Clear();
+                this.threads.Clear();
+                Agente.Reset();
                 this.IsJoined = false;
             }
         }
@@ -159,14 +166,41 @@ namespace Actividad2
 
             if (this.IsJoined)
             {
-                List<Thread> threads = new List<Thread>();
-     
-                Point cords = this.Circs[0].GetPoint();
-                this.Agentes.Add(new Agente(this.Circs[0], (Bitmap)this.PictureDivide.Image, this.Original, this.PictureDivide));
-                threads.Add(new Thread(new ThreadStart(Agentes[0].Elegir_Camino)));
-                threads[0].Name = $"Thread {0}";
-                threads[0].Start();
-              
+                Agente.mapa = (Bitmap)this.PictureDivide.Image;
+                Agente.mapa_limpio = this.Original;
+                Agente.Box = this.PictureDivide;
+                for(int h = 0; h < Circs.Count; h++)
+                {
+                    Point cords = this.Circs[h].GetPoint();
+                    this.Agentes.Add(new Agente(this.Circs[h]));
+                    threads.Add(new Thread(new ThreadStart(Agentes[h].Elegir_Camino)));
+                    threads[h].Name = $"Thread {h}";
+                    threads[h].Start();
+                }
+                SetTimer();
+            }
+        }
+
+        private void SetTimer()
+        {
+            Update_agentes = new System.Timers.Timer(50);
+            Update_agentes.Elapsed += Move_Agentes;
+            Update_agentes.AutoReset = true;
+            Update_agentes.Enabled = true;
+        }
+
+        private void Move_Agentes(object sender, ElapsedEventArgs e)
+        {
+            Update_agentes.Enabled = false;
+            Agente.Update_Box(this.Agentes,Update_agentes);
+
+            if(threads.All((t) => !t.IsAlive))
+            {
+                Update_agentes.AutoReset = false;
+                Update_agentes.Stop();
+                Update_agentes.Dispose();
+                Update_agentes.Close();
+
             }
         }
 
@@ -728,26 +762,20 @@ namespace Actividad2
     public class Agente
     {
         static Bitmap sprite = new Bitmap(Image.FromFile(@"C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\imgs\Agentes.png"),new Size(40,40));
-        static Dictionary<string,Queue<Thread>> Accesos = new Dictionary<string, Queue<Thread>>() {
-            {"borrar paso",new Queue<Thread>()},
-            {"update",new Queue<Thread>()},
-            {"mapa",new Queue<Thread>()}
-        };
-        Bitmap mapa, mapa_limpio;
+        static public Bitmap mapa, mapa_limpio;
+        static public PictureBox Box;
+        static Dictionary<string, Point> posiciones = new Dictionary<string, Point>();
         List<vertice> Historial = new List<vertice>();
         vertice Estacion;
-        PictureBox Box;
         Point Ubicacion;
         string name;
 
-        public Agente(vertice estacion,Bitmap mapa, Bitmap limpio, PictureBox box)
+        public Agente(vertice estacion)
         {
-            this.mapa = mapa;
-            this.mapa_limpio = limpio;
             this.Estacion = estacion;
             this.Ubicacion = estacion.GetPoint();
-            this.Box = box;
             this.name = estacion.getName();
+            Agente.posiciones.Add(estacion.getName(), new Point(this.Ubicacion.X,this.Ubicacion.Y));
             this.Nacer();
         }
 
@@ -755,8 +783,6 @@ namespace Actividad2
         {
             Graphics graphics = Graphics.FromImage(mapa);
             graphics.DrawImage(Agente.sprite, (Ubicacion.X - 20), (Ubicacion.Y - 20));
-            this.Update_Box();
-            Historial.Add(Estacion);
         }
 
         public void Elegir_Camino()
@@ -764,7 +790,8 @@ namespace Actividad2
             Dictionary<vertice, Arista> opciones = new Dictionary<vertice, Arista>(this.Estacion.GetVecinos());
             if (opciones.Count == 0 || opciones.Keys.All((op) => this.Historial.Contains(op)))
             {
-                MessageBox.Show($"Fin del agente {name}");
+                //MessageBox.Show($"Fin del agente {name}");
+                Thread.CurrentThread.Abort();
                 return;
             }
             vertice origen = Estacion;
@@ -773,11 +800,11 @@ namespace Actividad2
                 int eleccion = new Random().Next(opciones.Count);
                 this.Estacion = opciones.Keys.ToList<vertice>()[eleccion];
                 opciones.Remove(Estacion);
-            } while(Historial.Contains(Estacion));           
+            } while(Historial.Contains(Estacion));
             Recorrer(origen.GetVecinos()[Estacion]);
         }
 
-        public void Recorrer(Arista Camino)
+        private void Recorrer(Arista Camino)
         {
             this.Historial.Add(Estacion);
             List<int[]> pasos = Camino.GetPoints();
@@ -806,27 +833,40 @@ namespace Actividad2
         
         private void Dar_Paso(int[] pos)
         {
-            Del_Step();
             Ubicacion = new Point(pos[0], pos[1]);
-            Nacer();
             Thread.Sleep(50);
         }
 
-        private void Del_Step()
+        static private void Del_Step(Point ubicacion)
         {
             for (int y = 0; y < 40; y++)
             {
                 for (int x = 0; x < 40; x++)
                 {
-                    Color color = this.mapa_limpio.GetPixel((Ubicacion.X - 20) + x, (Ubicacion.Y - 20) + y);
-                    this.mapa.SetPixel((Ubicacion.X - 20) + x, (Ubicacion.Y - 20) + y, color);                }
+                    Color color = Agente.mapa_limpio.GetPixel((ubicacion.X - 20) + x, (ubicacion.Y - 20) + y);
+                    Agente.mapa.SetPixel((ubicacion.X - 20) + x, (ubicacion.Y - 20) + y, color);                }
             }
-            this.Update_Box();
         }
 
-        private void Update_Box()
+        static public void Update_Box(List<Agente> agentes, System.Timers.Timer timer)
         {
-            this.Box.Invoke(new Action(() => this.Box.Image = (Bitmap)this.mapa));
+            foreach(Agente agent in agentes)
+            {
+                Agente.Del_Step(posiciones[agent.name]);
+                posiciones[agent.name] = agent.Ubicacion;
+                agent.Nacer();
+            }
+            Agente.Box.Invoke(new Action(() => Agente.Box.Image = (Bitmap)Agente.mapa));
+            timer.Enabled = true;
+        }
+
+        static public void Reset()
+        {
+            mapa = null;
+            mapa_limpio = null;
+            Box = null;
+            posiciones = new Dictionary<string, Point>();
+
         }
     }
 }
