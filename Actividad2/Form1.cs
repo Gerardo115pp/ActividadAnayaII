@@ -159,10 +159,14 @@ namespace Actividad2
 
             if (this.IsJoined)
             {
+                List<Thread> threads = new List<Thread>();
+     
                 Point cords = this.Circs[0].GetPoint();
-                this.Agentes.Add(new Agente(this.Circs[0], (Bitmap)this.PictureDivide.Image,this.Original,this.PictureDivide));
-                Thread Caminar = new Thread(new ThreadStart(Agentes[0].Recorrer));
-                Caminar.Start();               
+                this.Agentes.Add(new Agente(this.Circs[0], (Bitmap)this.PictureDivide.Image, this.Original, this.PictureDivide));
+                threads.Add(new Thread(new ThreadStart(Agentes[0].Elegir_Camino)));
+                threads[0].Name = $"Thread {0}";
+                threads[0].Start();
+              
             }
         }
 
@@ -724,11 +728,17 @@ namespace Actividad2
     public class Agente
     {
         static Bitmap sprite = new Bitmap(Image.FromFile(@"C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\imgs\Agentes.png"),new Size(40,40));
+        static Dictionary<string,Queue<Thread>> Accesos = new Dictionary<string, Queue<Thread>>() {
+            {"borrar paso",new Queue<Thread>()},
+            {"update",new Queue<Thread>()},
+            {"mapa",new Queue<Thread>()}
+        };
         Bitmap mapa, mapa_limpio;
+        List<vertice> Historial = new List<vertice>();
         vertice Estacion;
         PictureBox Box;
         Point Ubicacion;
-
+        string name;
 
         public Agente(vertice estacion,Bitmap mapa, Bitmap limpio, PictureBox box)
         {
@@ -737,6 +747,7 @@ namespace Actividad2
             this.Estacion = estacion;
             this.Ubicacion = estacion.GetPoint();
             this.Box = box;
+            this.name = estacion.getName();
             this.Nacer();
         }
 
@@ -745,19 +756,30 @@ namespace Actividad2
             Graphics graphics = Graphics.FromImage(mapa);
             graphics.DrawImage(Agente.sprite, (Ubicacion.X - 20), (Ubicacion.Y - 20));
             this.Update_Box();
+            Historial.Add(Estacion);
         }
 
-        public Arista Elegir_Camino()
+        public void Elegir_Camino()
         {
-            Dictionary<vertice, Arista> opciones = this.Estacion.GetVecinos();
-            int eleccion = new Random().Next(opciones.Count);
-            this.Estacion = opciones.Keys.ToList<vertice>()[eleccion];            
-            return opciones[Estacion];
+            Dictionary<vertice, Arista> opciones = new Dictionary<vertice, Arista>(this.Estacion.GetVecinos());
+            if (opciones.Count == 0 || opciones.Keys.All((op) => this.Historial.Contains(op)))
+            {
+                MessageBox.Show($"Fin del agente {name}");
+                return;
+            }
+            vertice origen = Estacion;
+            do
+            {
+                int eleccion = new Random().Next(opciones.Count);
+                this.Estacion = opciones.Keys.ToList<vertice>()[eleccion];
+                opciones.Remove(Estacion);
+            } while(Historial.Contains(Estacion));           
+            Recorrer(origen.GetVecinos()[Estacion]);
         }
 
-        public void Recorrer()
+        public void Recorrer(Arista Camino)
         {
-            Arista Camino = Elegir_Camino();
+            this.Historial.Add(Estacion);
             List<int[]> pasos = Camino.GetPoints();
             if(Ubicacion == new Point(pasos[0][0], pasos[0][1]))
             {
@@ -779,6 +801,7 @@ namespace Actividad2
             {
                 MessageBox.Show("Yo no deberia aparecer... que extraño 0.o");
             }
+            Elegir_Camino();
         }
         
         private void Dar_Paso(int[] pos)
@@ -791,13 +814,12 @@ namespace Actividad2
 
         private void Del_Step()
         {
-            for(int y = 0; y < 40; y++)
+            for (int y = 0; y < 40; y++)
             {
-                for(int x = 0; x < 40; x++)
+                for (int x = 0; x < 40; x++)
                 {
-                    Color color = this.mapa_limpio.GetPixel((Ubicacion.X - 20)+ x, (Ubicacion.Y - 20) + y);
-                    this.mapa.SetPixel((Ubicacion.X - 20) + x, (Ubicacion.Y - 20) + y, color);
-                }
+                    Color color = this.mapa_limpio.GetPixel((Ubicacion.X - 20) + x, (Ubicacion.Y - 20) + y);
+                    this.mapa.SetPixel((Ubicacion.X - 20) + x, (Ubicacion.Y - 20) + y, color);                }
             }
             this.Update_Box();
         }

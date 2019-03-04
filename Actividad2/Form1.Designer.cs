@@ -107,9 +107,9 @@ namespace Actividad2
             this.Title.Font = new System.Drawing.Font("Russian", 18F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Title.Location = new System.Drawing.Point(527, 9);
             this.Title.Name = "Title";
-            this.Title.Size = new System.Drawing.Size(199, 27);
+            this.Title.Size = new System.Drawing.Size(211, 27);
             this.Title.TabIndex = 3;
-            this.Title.Text = "A c t i v i d a d   II";
+            this.Title.Text = "A c t i v i d a d   III";
             // 
             // MainMinBTN
             // 
