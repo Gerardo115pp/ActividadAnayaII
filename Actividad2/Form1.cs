@@ -7,23 +7,31 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Timers;
 using System.Windows.Forms;
 
 namespace Actividad2
 {
     public partial class MainWindow : Form
     {
-        private bool dragging = false;
+        private bool dragging = false,
+                     IsJoined = false,
+                     AgentsFinish = false;
+        private int cant_agentes = -1;
         private Point dragCursorPoint;
         private Point dragFormPoint;
         private List<vertice> Circs;
         private Bitmap Original;
+        private List<Agente> Agentes = new List<Agente>();
+        private List<Thread> threads = new List<Thread>();
 
+        private System.Timers.Timer Update_agentes;
 
         public MainWindow()
         {
             InitializeComponent();
             this.Circs = new List<vertice>();
+            Thread.CurrentThread.Name = "Proceso principal";
         }
 
         #region <Frontend>
@@ -110,16 +118,13 @@ namespace Actividad2
 
         private void AnalizarBTN_Click(object sender, EventArgs e)
         {
-            this.Cfind((Bitmap)this.PictureDivide.Image);
-            this.Unir((Bitmap)this.PictureBrute.Image);
-            this.BrutaStatus.ForeColor = Color.Green;
-            this.DivideStatus.ForeColor = Color.Green;
-
-
-
-
-
-
+            if (!IsJoined)
+            {
+                this.Cfind((Bitmap)this.PictureDivide.Image);
+                this.Unir((Bitmap)this.PictureBrute.Image);
+                this.BrutaStatus.ForeColor = Color.Green;
+                this.DivideStatus.ForeColor = Color.Green;
+            }
         }
 
         private void ArbolLbl_Click(object sender, EventArgs e)
@@ -139,16 +144,90 @@ namespace Actividad2
             {
                 this.PictureDivide.Image = new Bitmap(fileDialog.FileName);
                 this.PictureBrute.Image = (Bitmap)this.PictureDivide.Image.Clone();
+                this.PictureDivide.BackgroundImage = this.PictureDivide.Image;
+                this.PictureBrute.BackgroundImage = this.PictureBrute.Image;
                 this.BrutaStatus.ForeColor = Color.Red;
                 this.DivideStatus.ForeColor = Color.Red;
                 this.Circs.Clear();
                 this.CirculosListBox.Items.Clear();
+                this.Agentes.Clear();
+                this.threads.Clear();
+                Agente.Reset();
+                this.cant_agentes = -1;
+                this.IsJoined = false;
+                this.AgentsFinish = false;
             }
         }
 
         private void SaveBTN_Click(object sender, EventArgs e)
         {
             this.PictureBrute.Image.Save(this.SaveTextBox.Text);
+        }
+
+        private void BTN_Agentes_ButtonClick(object sender, EventArgs e)
+        {
+            if (this.IsJoined && !this.AgentsFinish)
+            {
+                cant_agentes = (cant_agentes == -1) ? Circs.Count : cant_agentes;
+                List<int> usados = new List<int>();
+                int k;
+                Random selector = new Random();
+                for(int h = 0; h < Circs.Count; h++)
+                {
+                    usados.Add(h);
+                }
+                Agente.mapa = (Bitmap)this.PictureDivide.Image;
+                Agente.mapa_limpio = this.Original;
+                Agente.Box = this.PictureDivide;
+                for(int h = 0; h < cant_agentes; h++)
+                {
+                    Point cords = this.Circs[h].GetPoint();
+                    k = usados[selector.Next(0,usados.Count)];
+                    usados.Remove(k);
+                    this.Agentes.Add(new Agente(this.Circs[k]));
+                    threads.Add(new Thread(new ThreadStart(Agentes[h].Elegir_Camino)));
+                    threads[h].Name = $"Thread {h}";
+                    threads[h].Start();
+                }
+                SetTimer();
+            }
+        }
+
+        private void SetTimer()
+        {
+            Update_agentes = new System.Timers.Timer(50);
+            Update_agentes.Elapsed += Move_Agentes;
+            Update_agentes.AutoReset = true;
+            Update_agentes.Enabled = true;
+        }
+
+        private void Move_Agentes(object sender, ElapsedEventArgs e)
+        {
+            Update_agentes.Enabled = false;
+            Agente.Update_Box(this.Agentes,Update_agentes);
+
+            if(threads.All((t) => !t.IsAlive))
+            {
+                Update_agentes.AutoReset = false;
+                Update_agentes.Stop();
+                Update_agentes.Dispose();
+                Update_agentes.Close();
+                this.AgentsFinish = true;
+                this.Agentes.ForEach((x) => x.calc_recorrido());
+
+            }
+        }
+
+        private void elegirCantidadToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (IsJoined)
+            {
+                Cant_change cant = new Cant_change(Circs.Count);
+                if(cant.ShowDialog() == DialogResult.OK)
+                {
+                    cant_agentes = cant.cantidad;
+                }
+            }
         }
 
         #endregion </Comportamiento>
@@ -318,43 +397,22 @@ namespace Actividad2
             return arista;
         }
 
+        private void maximoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            cant_agentes = -1;
+        }
+
         private void Unir(Bitmap bitmap)
         {
-            ArrayList min = null,
-                      actual = new ArrayList(),
-                      block_min = null,
-                      block_act = new ArrayList();
 
-            bool ok;
+
             foreach(vertice v in this.Circs)
             {
                 foreach(vertice other in this.Circs)
                 {
                     if (v != other)
-                    {
-                        
-                        ok = v.Bresenham(bitmap, other);
-                        actual = this.get_min(v, other);
-                        if (min != null)
-                        {
-                            min = (Convert.ToInt32(actual[2]) < Convert.ToInt32(min[2])) ? actual : min;
-                        }
-                        else
-                        {
-                            min = actual;
-                        }
-                        if (ok)
-                        {
-                            block_act = this.get_min(v, other);
-                            if(block_min != null)
-                            {
-                                block_min = (Convert.ToInt32(block_act[2]) < Convert.ToInt32(block_min[2])) ? block_act : block_min;
-                            }
-                            else
-                            {
-                                block_min = block_act;
-                            }
-                        }
+                    {                       
+                        v.Bresenham(bitmap, other);
                     }                        
                 }
             }
@@ -362,29 +420,28 @@ namespace Actividad2
             {
                 v.PaintLines(bitmap, Color.LimeGreen);
             }
-            if (min != null)
-            {
-                Graphics.FromImage(bitmap).DrawLine(new Pen(new SolidBrush(Color.Orange)),((vertice)min[0]).GetPoint(),((vertice)min[1]).GetPoint());
-                this.CirculosListBox.Items.Add($"Circulos mas crecanos sin bloqueo: {((vertice)min[0]).getName()} y {((vertice) min[1]).getName()}");
-
-            }
-            if (block_min != null)
-            {
-                Graphics.FromImage(bitmap).DrawLine(new Pen(new SolidBrush(Color.Purple)), ((vertice)block_min[0]).GetPoint(), ((vertice)block_min[1]).GetPoint());
-                this.CirculosListBox.Items.Add($"Circulos mas crecanos con bloqueo: {((vertice)block_min[0]).getName()} y {((vertice)block_min[1]).getName()}");
-            }
 
             this.Original = (Bitmap)this.PictureBrute.Image.Clone();
             this.PictureDivide.Image = (Bitmap)this.Original.Clone();
             this.AddCrosses(bitmap);
-
+            this.IsJoined = true;
 
         }
+
 
 
         #endregion </Fuerza Bruta>
 
         #endregion </Script>
+
+        private void CaminosDeAgenteMenuItem_Click(object sender, EventArgs e)
+        {
+            if (AgentsFinish)
+            {
+                CaminosForm caminosf = new CaminosForm((Bitmap)this.PictureBrute.Image, this.Agentes);
+                caminosf.ShowDialog();
+            }
+        }
 
         private void PictureDivide_Click(object sender, EventArgs e)
         {
@@ -434,14 +491,16 @@ namespace Actividad2
         vertice pA, pB;
         string name;
         bool painted;
+        double distancia;
 
         public Arista(List<int[]> points,vertice pA,vertice pB)
         {
             this.points = points;
             this.pA = pA;
             this.pB = pB;
-            this.name = $"({pA.getName()},{pB.getName()})";
+            this.name = $"({pA.getName()} Entre {pB.getName()})";
             this.painted = false;
+            this.distancia = calc_distancia();
         }
 
         public override string ToString()
@@ -454,6 +513,40 @@ namespace Actividad2
             return this.points.Count;
         }
 
+        public double GetDist()
+        {
+            return this.distancia;
+        }
+
+        private double calc_distancia()
+        {
+            int distancia;
+            int dx = pA.getX() - pB.getX(),
+                dy = pA.getY() - pB.getY();
+            if (dx != 0 && dy != 0)
+            {
+                distancia = (Int32)(Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2)));
+            }
+            else if (dx == 0)
+            {
+                distancia = (Math.Abs(dy));
+            }
+            else
+            {
+                distancia = (Math.Abs(dx));
+            }
+            return distancia;
+        }
+
+        public vertice Get_Destino(vertice actual)
+        {
+            return (actual == pA) ? pB : pA;
+        }
+
+        public List<int[]> GetPoints()
+        {
+            return this.points;
+        }
 
         public void SetColors(Color color,Bitmap bitmap, bool force = false)
         {
@@ -700,6 +793,11 @@ namespace Actividad2
             this.visited = true;
         }
 
+        public void ResetVisit()
+        {
+            this.visited = false;
+        }
+
         public int[] GetPos()
         {
             return new int[] { cords[0], cords[1] };
@@ -725,5 +823,183 @@ namespace Actividad2
             return this.radio;
         }
 
+    }
+
+    public class Agente
+    {
+        static Bitmap sprite = new Bitmap(Image.FromFile(@"C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\imgs\Agentes.png"),new Size(40,40));
+        static public Bitmap mapa, mapa_limpio;
+        static public PictureBox Box;
+        static Dictionary<string, Point> posiciones = new Dictionary<string, Point>();
+        List<Arista> Historial = new List<Arista>();
+        List<vertice> Visitados = new List<vertice>();
+        vertice Estacion;
+        Point Ubicacion;
+        Bitmap SelfSprite;
+        string name;
+        double? distancia = null;
+
+        public Agente(vertice estacion)
+        {
+            this.Estacion = estacion;
+            Visitados.Add(estacion);
+            this.Ubicacion = estacion.GetPoint();
+            this.name = estacion.getName();
+            Agente.posiciones.Add(estacion.getName(), new Point(this.Ubicacion.X,this.Ubicacion.Y));
+            this.SelfSprite = this.DrawSelf(); 
+            this.Nacer();
+        }
+
+        public double? Distancia
+        {
+            get { return distancia; }
+        }
+
+        public int visitados
+        {
+            get
+            {
+                return Visitados.Count;
+            }
+        } 
+
+        public List<vertice> GetVisitados()
+        {
+            return this.Visitados;
+        }
+
+        public override string ToString()
+        {
+            return $"Agente {this.name}";
+        }
+
+        public List<Arista> GetHistorial()
+        {
+            return this.Historial;
+        }
+
+        private Bitmap DrawSelf()
+        {
+            Bitmap self = (Bitmap)Agente.sprite.Clone();
+            Graphics graphics = Graphics.FromImage(self);
+            graphics.DrawString(this.name, new Font("Arial",20), new SolidBrush(Color.FromArgb(255,200,40,40)), 5, 5);
+            return self;
+        }
+
+        private void Nacer()
+        {
+            Graphics graphics = Graphics.FromImage(mapa);
+            graphics.DrawImage(this.SelfSprite, (Ubicacion.X - 20), (Ubicacion.Y - 20));
+        }
+
+        public void chose_one()
+        {
+            this.name += "(Ruta mas eficiente)";
+        }
+
+        public void Elegir_Camino()
+        {
+            Dictionary<vertice, Arista> opciones = new Dictionary<vertice, Arista>(this.Estacion.GetVecinos());
+            if (opciones.Count == 0 || opciones.Values.All((op) => this.Historial.Contains(op)))
+            {
+                //MessageBox.Show($"Fin del agente {name}");
+                Thread.CurrentThread.Abort();
+                return;
+            }
+            vertice origen = Estacion;
+            do
+            {
+                int eleccion = new Random().Next(opciones.Count);
+                this.Estacion = opciones.Keys.ToList<vertice>()[eleccion];
+                opciones.Remove(Estacion);
+            } while(Historial.Contains(origen.GetVecinos()[Estacion]));
+            if (!Visitados.Contains(Estacion))
+            {
+                Visitados.Add(Estacion);
+            }
+            Recorrer(origen.GetVecinos()[Estacion]);
+        }
+
+        private void Recorrer(Arista Camino)
+        {
+            this.Historial.Add(Camino);
+            List<int[]> pasos = Camino.GetPoints();
+            if(Ubicacion == new Point(pasos[0][0], pasos[0][1]))
+            {
+                for(int h = 0; h < (pasos.Count - 11); h += 10)
+                {
+                    Dar_Paso(pasos[h]);
+                }
+                Dar_Paso(Estacion.GetPos());
+            }
+            else if(Ubicacion == new Point(pasos[(pasos.Count-1)][0], pasos[(pasos.Count - 1)][1]))
+            {
+                for(int h = (pasos.Count - 1); h >= 20; h -= 10)
+                {
+                    Dar_Paso(pasos[h]);
+                }
+                Dar_Paso(Estacion.GetPos());
+            }
+            else
+            {
+                MessageBox.Show("Yo no deberia aparecer... que extraño 0.o");
+            }
+            Elegir_Camino();
+        }
+        
+        private void Dar_Paso(int[] pos)
+        {
+            Ubicacion = new Point(pos[0], pos[1]);
+            Thread.Sleep(50);
+        }
+
+        public void calc_recorrido()
+        {
+            if((distancia == null))
+            {
+                double r = 0;
+                foreach (Arista a in Historial)
+                {
+                    r += a.GetDist();
+                }
+                this.distancia = r;
+            }
+        }
+
+        #region <metodos para update>
+
+        static private void Del_Step(Point ubicacion)
+        {
+            for (int y = 0; y < 40; y++)
+            {
+                for (int x = 0; x < 40; x++)
+                {
+                    Color color = Agente.mapa_limpio.GetPixel((ubicacion.X - 20) + x, (ubicacion.Y - 20) + y);
+                    Agente.mapa.SetPixel((ubicacion.X - 20) + x, (ubicacion.Y - 20) + y, color);                }
+            }
+        }
+
+        static public void Update_Box(List<Agente> agentes, System.Timers.Timer timer)
+        {
+            foreach(Agente agent in agentes)
+            {
+                Agente.Del_Step(posiciones[agent.name]);
+                posiciones[agent.name] = agent.Ubicacion;
+                agent.Nacer();
+            }
+            Agente.Box.Invoke(new Action(() => Agente.Box.Image = (Bitmap)Agente.mapa));
+            timer.Enabled = true;
+        }
+
+        static public void Reset()
+        {
+            mapa = null;
+            mapa_limpio = null;
+            Box = null;
+            posiciones = new Dictionary<string, Point>();
+
+        }
+
+        #endregion
     }
 }

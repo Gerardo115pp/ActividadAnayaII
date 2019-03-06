@@ -1,1 +1,4 @@
 *.png
+*.ide-wal
+*.ide-shm
+*.sou
