@@ -9,3 +9,5 @@ C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\
 C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\obj\Debug\Actividad2.pdb
 C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\obj\Debug\Actividad2.Arbol_From.resources
 C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\obj\Debug\Actividad2.csprojAssemblyReference.cache
+C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\obj\Debug\Actividad2.Cant_change.resources
+C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\obj\Debug\Actividad2.CaminosForm.resources

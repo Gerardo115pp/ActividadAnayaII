@@ -56,6 +56,9 @@ namespace Actividad2
             this.BrutaStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.BTN_Agentes = new System.Windows.Forms.ToolStripSplitButton();
             this.CantidadDeAgentesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.maximoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.elegirCantidadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.CaminosDeAgenteMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ControlPanel.SuspendLayout();
             this.PicturePanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PictureDivide)).BeginInit();
@@ -413,7 +416,8 @@ namespace Actividad2
             // BTN_Agentes
             // 
             this.BTN_Agentes.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.CantidadDeAgentesToolStripMenuItem});
+            this.CantidadDeAgentesToolStripMenuItem,
+            this.CaminosDeAgenteMenuItem});
             this.BTN_Agentes.Image = ((System.Drawing.Image)(resources.GetObject("BTN_Agentes.Image")));
             this.BTN_Agentes.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.BTN_Agentes.Name = "BTN_Agentes";
@@ -424,9 +428,33 @@ namespace Actividad2
             // CantidadDeAgentesToolStripMenuItem
             // 
             this.CantidadDeAgentesToolStripMenuItem.BackColor = System.Drawing.Color.Red;
+            this.CantidadDeAgentesToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.maximoToolStripMenuItem,
+            this.elegirCantidadToolStripMenuItem});
             this.CantidadDeAgentesToolStripMenuItem.Name = "CantidadDeAgentesToolStripMenuItem";
             this.CantidadDeAgentesToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
             this.CantidadDeAgentesToolStripMenuItem.Text = "Cantidad de agentes";
+            // 
+            // maximoToolStripMenuItem
+            // 
+            this.maximoToolStripMenuItem.Name = "maximoToolStripMenuItem";
+            this.maximoToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.maximoToolStripMenuItem.Text = "Maximo";
+            this.maximoToolStripMenuItem.Click += new System.EventHandler(this.maximoToolStripMenuItem_Click);
+            // 
+            // elegirCantidadToolStripMenuItem
+            // 
+            this.elegirCantidadToolStripMenuItem.Name = "elegirCantidadToolStripMenuItem";
+            this.elegirCantidadToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.elegirCantidadToolStripMenuItem.Text = "Elegir cantidad";
+            this.elegirCantidadToolStripMenuItem.Click += new System.EventHandler(this.elegirCantidadToolStripMenuItem_Click);
+            // 
+            // CaminosDeAgenteMenuItem
+            // 
+            this.CaminosDeAgenteMenuItem.Name = "CaminosDeAgenteMenuItem";
+            this.CaminosDeAgenteMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.CaminosDeAgenteMenuItem.Text = "Caminos de Agente";
+            this.CaminosDeAgenteMenuItem.Click += new System.EventHandler(this.CaminosDeAgenteMenuItem_Click);
             // 
             // MainWindow
             // 
@@ -495,6 +523,9 @@ namespace Actividad2
         private System.Windows.Forms.CheckBox EnumCheckBox;
         private System.Windows.Forms.ToolStripSplitButton BTN_Agentes;
         private System.Windows.Forms.ToolStripMenuItem CantidadDeAgentesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem maximoToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem elegirCantidadToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem CaminosDeAgenteMenuItem;
     }
 }
 

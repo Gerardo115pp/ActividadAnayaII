@@ -16,7 +16,8 @@ namespace Actividad2
     {
         private bool dragging = false,
                      IsJoined = false,
-                     updating = false;
+                     AgentsFinish = false;
+        private int cant_agentes = -1;
         private Point dragCursorPoint;
         private Point dragFormPoint;
         private List<vertice> Circs;
@@ -152,7 +153,9 @@ namespace Actividad2
                 this.Agentes.Clear();
                 this.threads.Clear();
                 Agente.Reset();
+                this.cant_agentes = -1;
                 this.IsJoined = false;
+                this.AgentsFinish = false;
             }
         }
 
@@ -163,16 +166,25 @@ namespace Actividad2
 
         private void BTN_Agentes_ButtonClick(object sender, EventArgs e)
         {
-
-            if (this.IsJoined)
+            if (this.IsJoined && !this.AgentsFinish)
             {
+                cant_agentes = (cant_agentes == -1) ? Circs.Count : cant_agentes;
+                List<int> usados = new List<int>();
+                int k;
+                Random selector = new Random();
+                for(int h = 0; h < Circs.Count; h++)
+                {
+                    usados.Add(h);
+                }
                 Agente.mapa = (Bitmap)this.PictureDivide.Image;
                 Agente.mapa_limpio = this.Original;
                 Agente.Box = this.PictureDivide;
-                for(int h = 0; h < Circs.Count; h++)
+                for(int h = 0; h < cant_agentes; h++)
                 {
                     Point cords = this.Circs[h].GetPoint();
-                    this.Agentes.Add(new Agente(this.Circs[h]));
+                    k = usados[selector.Next(0,usados.Count)];
+                    usados.Remove(k);
+                    this.Agentes.Add(new Agente(this.Circs[k]));
                     threads.Add(new Thread(new ThreadStart(Agentes[h].Elegir_Camino)));
                     threads[h].Name = $"Thread {h}";
                     threads[h].Start();
@@ -200,7 +212,21 @@ namespace Actividad2
                 Update_agentes.Stop();
                 Update_agentes.Dispose();
                 Update_agentes.Close();
+                this.AgentsFinish = true;
+                this.Agentes.ForEach((x) => x.calc_recorrido());
 
+            }
+        }
+
+        private void elegirCantidadToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (IsJoined)
+            {
+                Cant_change cant = new Cant_change(Circs.Count);
+                if(cant.ShowDialog() == DialogResult.OK)
+                {
+                    cant_agentes = cant.cantidad;
+                }
             }
         }
 
@@ -371,6 +397,11 @@ namespace Actividad2
             return arista;
         }
 
+        private void maximoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            cant_agentes = -1;
+        }
+
         private void Unir(Bitmap bitmap)
         {
 
@@ -398,11 +429,19 @@ namespace Actividad2
         }
 
 
+
         #endregion </Fuerza Bruta>
 
         #endregion </Script>
 
-        
+        private void CaminosDeAgenteMenuItem_Click(object sender, EventArgs e)
+        {
+            if (AgentsFinish)
+            {
+                CaminosForm caminosf = new CaminosForm((Bitmap)this.PictureBrute.Image, this.Agentes);
+                caminosf.ShowDialog();
+            }
+        }
 
         private void PictureDivide_Click(object sender, EventArgs e)
         {
@@ -452,14 +491,16 @@ namespace Actividad2
         vertice pA, pB;
         string name;
         bool painted;
+        double distancia;
 
         public Arista(List<int[]> points,vertice pA,vertice pB)
         {
             this.points = points;
             this.pA = pA;
             this.pB = pB;
-            this.name = $"({pA.getName()},{pB.getName()})";
+            this.name = $"({pA.getName()} Entre {pB.getName()})";
             this.painted = false;
+            this.distancia = calc_distancia();
         }
 
         public override string ToString()
@@ -470,6 +511,31 @@ namespace Actividad2
         public int Len()
         {
             return this.points.Count;
+        }
+
+        public double GetDist()
+        {
+            return this.distancia;
+        }
+
+        private double calc_distancia()
+        {
+            int distancia;
+            int dx = pA.getX() - pB.getX(),
+                dy = pA.getY() - pB.getY();
+            if (dx != 0 && dy != 0)
+            {
+                distancia = (Int32)(Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2)));
+            }
+            else if (dx == 0)
+            {
+                distancia = (Math.Abs(dy));
+            }
+            else
+            {
+                distancia = (Math.Abs(dx));
+            }
+            return distancia;
         }
 
         public vertice Get_Destino(vertice actual)
@@ -765,30 +831,76 @@ namespace Actividad2
         static public Bitmap mapa, mapa_limpio;
         static public PictureBox Box;
         static Dictionary<string, Point> posiciones = new Dictionary<string, Point>();
-        List<vertice> Historial = new List<vertice>();
+        List<Arista> Historial = new List<Arista>();
+        List<vertice> Visitados = new List<vertice>();
         vertice Estacion;
         Point Ubicacion;
+        Bitmap SelfSprite;
         string name;
+        double? distancia = null;
 
         public Agente(vertice estacion)
         {
             this.Estacion = estacion;
+            Visitados.Add(estacion);
             this.Ubicacion = estacion.GetPoint();
             this.name = estacion.getName();
             Agente.posiciones.Add(estacion.getName(), new Point(this.Ubicacion.X,this.Ubicacion.Y));
+            this.SelfSprite = this.DrawSelf(); 
             this.Nacer();
+        }
+
+        public double? Distancia
+        {
+            get { return distancia; }
+        }
+
+        public int visitados
+        {
+            get
+            {
+                return Visitados.Count;
+            }
+        } 
+
+        public List<vertice> GetVisitados()
+        {
+            return this.Visitados;
+        }
+
+        public override string ToString()
+        {
+            return $"Agente {this.name}";
+        }
+
+        public List<Arista> GetHistorial()
+        {
+            return this.Historial;
+        }
+
+        private Bitmap DrawSelf()
+        {
+            Bitmap self = (Bitmap)Agente.sprite.Clone();
+            Graphics graphics = Graphics.FromImage(self);
+            graphics.DrawString(this.name, new Font("Arial",20), new SolidBrush(Color.FromArgb(255,200,40,40)), 5, 5);
+            return self;
         }
 
         private void Nacer()
         {
             Graphics graphics = Graphics.FromImage(mapa);
-            graphics.DrawImage(Agente.sprite, (Ubicacion.X - 20), (Ubicacion.Y - 20));
+            graphics.DrawImage(this.SelfSprite, (Ubicacion.X - 20), (Ubicacion.Y - 20));
+        }
+
+        public void chose_one()
+        {
+            this.name += "(Ruta mas eficiente)";
         }
 
         public void Elegir_Camino()
         {
             Dictionary<vertice, Arista> opciones = new Dictionary<vertice, Arista>(this.Estacion.GetVecinos());
-            if (opciones.Count == 0 || opciones.Keys.All((op) => this.Historial.Contains(op)))
+            if (opciones.Count == 0 || opciones.Values.All((op) => this.Historial.Contains(op)))
             {
                 //MessageBox.Show($"Fin del agente {name}");
                 Thread.CurrentThread.Abort();
@@ -800,13 +912,17 @@ namespace Actividad2
                 int eleccion = new Random().Next(opciones.Count);
                 this.Estacion = opciones.Keys.ToList<vertice>()[eleccion];
                 opciones.Remove(Estacion);
-            } while(Historial.Contains(Estacion));
+            } while(Historial.Contains(origen.GetVecinos()[Estacion]));
+            if (!Visitados.Contains(Estacion))
+            {
+                Visitados.Add(Estacion);
+            }
             Recorrer(origen.GetVecinos()[Estacion]);
         }
 
         private void Recorrer(Arista Camino)
         {
-            this.Historial.Add(Estacion);
+            this.Historial.Add(Camino);
             List<int[]> pasos = Camino.GetPoints();
             if(Ubicacion == new Point(pasos[0][0], pasos[0][1]))
             {
@@ -836,6 +952,21 @@ namespace Actividad2
             Ubicacion = new Point(pos[0], pos[1]);
             Thread.Sleep(50);
         }
+
+        public void calc_recorrido()
+        {
+            if((distancia == null))
+            {
+                double r = 0;
+                foreach (Arista a in Historial)
+                {
+                    r += a.GetDist();
+                }
+                this.distancia = r;
+            }
+        }
+
+        #region <metodos para update>
 
         static private void Del_Step(Point ubicacion)
         {
@@ -868,5 +999,7 @@ namespace Actividad2
             posiciones = new Dictionary<string, Point>();
 
         }
+
+        #endregion
     }
 }
