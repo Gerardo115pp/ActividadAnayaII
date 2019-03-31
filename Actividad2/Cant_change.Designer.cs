@@ -47,6 +47,9 @@
             this.ControlesChange.Name = "ControlesChange";
             this.ControlesChange.Size = new System.Drawing.Size(233, 35);
             this.ControlesChange.TabIndex = 0;
+            this.ControlesChange.MouseDown += new System.Windows.Forms.MouseEventHandler(this.ControlesChange_MouseDown);
+            this.ControlesChange.MouseMove += new System.Windows.Forms.MouseEventHandler(this.ControlesChange_MouseMove);
+            this.ControlesChange.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ControlesChange_MouseUp);
             // 
             // CantLBL
             // 

@@ -55,6 +55,7 @@ namespace Actividad2
             this.DivideStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.BrutaStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.BTN_Agentes = new System.Windows.Forms.ToolStripSplitButton();
+            this.algoritmosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.CantidadDeAgentesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.maximoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.elegirCantidadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -107,12 +108,12 @@ namespace Actividad2
             // 
             this.Title.AutoSize = true;
             this.Title.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.Title.Font = new System.Drawing.Font("Russian", 18F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Title.Font = new System.Drawing.Font("Russian", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Title.Location = new System.Drawing.Point(527, 9);
             this.Title.Name = "Title";
-            this.Title.Size = new System.Drawing.Size(211, 27);
+            this.Title.Size = new System.Drawing.Size(199, 27);
             this.Title.TabIndex = 3;
-            this.Title.Text = "A c t i v i d a d   III";
+            this.Title.Text = "A c t i v i d a d   IV";
             // 
             // MainMinBTN
             // 
@@ -206,7 +207,6 @@ namespace Actividad2
             this.PictureDivide.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.PictureDivide.TabIndex = 1;
             this.PictureDivide.TabStop = false;
-            this.PictureDivide.Click += new System.EventHandler(this.PictureDivide_Click);
             // 
             // PictureBrute
             // 
@@ -416,6 +416,7 @@ namespace Actividad2
             // BTN_Agentes
             // 
             this.BTN_Agentes.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.algoritmosToolStripMenuItem,
             this.CantidadDeAgentesToolStripMenuItem,
             this.CaminosDeAgenteMenuItem});
             this.BTN_Agentes.Image = ((System.Drawing.Image)(resources.GetObject("BTN_Agentes.Image")));
@@ -424,6 +425,13 @@ namespace Actividad2
             this.BTN_Agentes.Size = new System.Drawing.Size(82, 33);
             this.BTN_Agentes.Text = "Agentes";
             this.BTN_Agentes.ButtonClick += new System.EventHandler(this.BTN_Agentes_ButtonClick);
+            // 
+            // algoritmosToolStripMenuItem
+            // 
+            this.algoritmosToolStripMenuItem.Name = "algoritmosToolStripMenuItem";
+            this.algoritmosToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.algoritmosToolStripMenuItem.Text = "Algoritmos";
+            this.algoritmosToolStripMenuItem.Click += new System.EventHandler(this.algoritmosToolStripMenuItem_Click);
             // 
             // CantidadDeAgentesToolStripMenuItem
             // 
@@ -526,6 +534,7 @@ namespace Actividad2
         private System.Windows.Forms.ToolStripMenuItem maximoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem elegirCantidadToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem CaminosDeAgenteMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem algoritmosToolStripMenuItem;
     }
 }
 

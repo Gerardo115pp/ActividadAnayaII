@@ -61,19 +61,19 @@ namespace Actividad2
 
         private void calc_best()
         {
-            Agente mx = this.agentes[0];
+            Agente mx = this.agentes[0];// 2 operaciones elementales
             foreach(Agente a in this.agentes)
             {
-                if (mx.visitados < a.visitados)
+                if (mx.visitados < a.visitados)//3 operaciones elementales
                 {
                     mx = a;
                 }
-                else if (mx.visitados == a.visitados)
+                else if (mx.visitados == a.visitados)// 3 operaciones elementales
                 {
-                    mx = (mx.Distancia > a.Distancia) ? a : mx;
+                    mx = (mx.Distancia > a.Distancia) ? a : mx;//5 operaciones elementales
                 }
             }
-            mx.chose_one();
+            mx.chose_one();// una operacion elemental
         }
 
         private void CaminosForm_Load(object sender, EventArgs e)
