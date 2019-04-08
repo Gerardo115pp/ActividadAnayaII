@@ -59,6 +59,12 @@
     <Compile Include="Cant_change.Designer.cs">
       <DependentUpon>Cant_change.cs</DependentUpon>
     </Compile>
+    <Compile Include="DescribePK.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DescribePK.Designer.cs">
+      <DependentUpon>DescribePK.cs</DependentUpon>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -84,6 +90,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Cant_change.resx">
       <DependentUpon>Cant_change.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DescribePK.resx">
+      <DependentUpon>DescribePK.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>

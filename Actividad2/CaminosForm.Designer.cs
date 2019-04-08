@@ -29,8 +29,8 @@
         private void InitializeComponent()
         {
             this.Controles = new System.Windows.Forms.Panel();
-            this.CloseBTN = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
+            this.CloseBTN = new System.Windows.Forms.Button();
             this.PictureCaminos = new System.Windows.Forms.PictureBox();
             this.AgentesLista = new System.Windows.Forms.ListBox();
             this.TituloAgentes = new System.Windows.Forms.Panel();
@@ -59,9 +59,21 @@
             this.Controles.Name = "Controles";
             this.Controles.Size = new System.Drawing.Size(890, 53);
             this.Controles.TabIndex = 0;
+            this.Controles.Paint += new System.Windows.Forms.PaintEventHandler(this.Controles_Paint);
             this.Controles.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Controles_MouseDown);
             this.Controles.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Controles_MouseMove);
             this.Controles.MouseUp += new System.Windows.Forms.MouseEventHandler(this.Controles_MouseUp);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Russian", 19F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(138)))), ((int)(((byte)(219)))), ((int)(((byte)(8)))));
+            this.label1.Location = new System.Drawing.Point(384, 12);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(140, 30);
+            this.label1.TabIndex = 1;
+            this.label1.Text = "C A M I N O S";
             // 
             // CloseBTN
             // 
@@ -78,17 +90,6 @@
             this.CloseBTN.Text = "X";
             this.CloseBTN.UseVisualStyleBackColor = true;
             this.CloseBTN.Click += new System.EventHandler(this.CloseBTN_Click);
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Russian", 19F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(138)))), ((int)(((byte)(219)))), ((int)(((byte)(8)))));
-            this.label1.Location = new System.Drawing.Point(384, 12);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(140, 30);
-            this.label1.TabIndex = 1;
-            this.label1.Text = "C A M I N O S";
             // 
             // PictureCaminos
             // 

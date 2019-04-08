@@ -90,7 +90,7 @@
             this.Choices.Controls.Add(this.op_kruskal);
             this.Choices.Controls.Add(this.op_prim);
             this.Choices.Font = new System.Drawing.Font("Fatherland Faker", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Choices.Location = new System.Drawing.Point(152, 111);
+            this.Choices.Location = new System.Drawing.Point(155, 107);
             this.Choices.Name = "Choices";
             this.Choices.Size = new System.Drawing.Size(251, 39);
             this.Choices.TabIndex = 1;
@@ -154,6 +154,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "Rutas";
             this.Text = "Rutas";
+            this.Load += new System.EventHandler(this.Rutas_Load);
             this.Controls_panel.ResumeLayout(false);
             this.Controls_panel.PerformLayout();
             this.Choices.ResumeLayout(false);

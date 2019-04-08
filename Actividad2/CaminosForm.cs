@@ -87,8 +87,17 @@ namespace Actividad2
             
         }
 
+        private void Controles_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
         private void AgentesLista_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if(AgentesLista.SelectedIndex >= this.agentes.Count)
+            {
+                return;
+            }
             this.AristasList.Items.Clear();
             this.VerticiesCB.Items.Clear();
             this.Editable = (Bitmap)this.Original.Clone();

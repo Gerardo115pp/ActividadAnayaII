@@ -53,5 +53,10 @@ namespace Actividad2
                 this.selected = this.Choices.Controls.IndexOf(new_selected);
             }
         }
+
+        private void Rutas_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

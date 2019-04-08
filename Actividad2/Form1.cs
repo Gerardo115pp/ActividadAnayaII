@@ -16,7 +16,9 @@ namespace Actividad2
     {
         private bool dragging = false,
                      IsJoined = false,
-                     AgentsFinish = false;
+                     AgentsFinish = false,
+                     done_prim = false,
+                     done_kruskal = false;
         private int cant_agentes = -1,
                     path_maker = 0;
         private Point dragCursorPoint;
@@ -25,6 +27,7 @@ namespace Actividad2
         private Bitmap Original;
         private List<Agente> Agentes = new List<Agente>();
         private List<Thread> threads = new List<Thread>();
+        private object R1, R2;
 
         private System.Timers.Timer Update_agentes;
 
@@ -157,6 +160,10 @@ namespace Actividad2
                 this.cant_agentes = -1;
                 this.IsJoined = false;
                 this.AgentsFinish = false;
+                this.BruteLabel.Text = "Fuerza Bruta";
+                this.DivdeLabel.Text = "Divide";
+                done_prim = false;
+                done_kruskal = false;
             }
         }
 
@@ -201,11 +208,12 @@ namespace Actividad2
 
         private void AddCrosses(Bitmap bitmap)
         {
+            int size = Convert.ToInt32(bitmap.Width * 0.02);
             Graphics g = Graphics.FromImage(bitmap);
             foreach (vertice C in this.Circs)
             {
                 this.CirculosListBox.Items.Add(C);
-                g.DrawString(C.getName(), new Font("Arial", 16), new SolidBrush(Color.Red), C.getX(), C.getY());
+                g.DrawString(C.getName(), new Font("Arial", size), new SolidBrush(Color.Red), C.getX(), C.getY());
                 this.drawCROSS(C.getX(), C.getY(),bitmap);
             }
         }
@@ -371,9 +379,9 @@ namespace Actividad2
 
         private void BTN_Agentes_ButtonClick(object sender, EventArgs e)
         {
-            if (this.IsJoined && !this.AgentsFinish)
+            if (this.IsJoined)
             {
-                if(this.path_maker == 0)
+                if(this.path_maker == 0 && !this.AgentsFinish)
                 {
                     cant_agentes = (cant_agentes == -1) ? Circs.Count : cant_agentes;
                     List<int> usados = new List<int>();
@@ -398,8 +406,12 @@ namespace Actividad2
                     }
                     SetTimer();
                 }
-                else if(this.path_maker == 1)
+                else if(this.path_maker == 1 && !done_kruskal)
                 {
+                    /*
+                     * KRUSKAL
+                     */ 
+
                     HashSet<Arista> conjunto_aristas = new HashSet<Arista>();
                     Pqueue<Arista> aristas = new Pqueue<Arista>();
                     Dictionary<vertice, Arista> vecinos;
@@ -420,33 +432,36 @@ namespace Actividad2
                         MessageBox.Show("No hay caminos posibles");
                         return;
                     }
-                    UnionFindSet<vertice> unionFind = new UnionFindSet<vertice>();
-                    Dictionary<string, vertice> Clones = new Dictionary<string, vertice>();
-                    Arista this_ar = aristas.Dequeue().Data;
-                    vertice ARM_root = this_ar.A.Clone(),this_v = this_ar.B.Clone(),pA,pB;
-                    ARM_root.Add_Vecino(this_ar.Clone(ARM_root, this_v), this_v);
-                    Clones.Add(ARM_root.getName(), ARM_root);
-                    Clones.Add(this_v.getName(), this_v);
-                    unionFind.MakeSet(ARM_root).Add(this_v);
-       
+                    UnionFindSet<vertice> unionFind = new UnionFindSet<vertice>();// 1 operacion
+                    Dictionary<string, vertice> Clones = new Dictionary<string, vertice>();// 1 operacion
+                    Arista this_ar = aristas.Dequeue().Data;// 2 operacion
+                    List<Arista> Aceptadas = new List<Arista>();// 1 operacion
+                    Aceptadas.Add(this_ar);// 1 operacion
+                    vertice ARM_root = this_ar.A.Clone(),this_v = this_ar.B.Clone(),pA,pB;// 2 operacion
+                    ARM_root.Add_Vecino(this_ar.Clone(ARM_root, this_v), this_v);// 2 operacion
+                    Clones.Add(ARM_root.getName(), ARM_root);// 1 operacion
+                    Clones.Add(this_v.getName(), this_v);// 1 operacion
+                    unionFind.MakeSet(ARM_root).Add(this_v);// 2 operacion
+
                     bool a_in, b_in;
-                    int arm_ideal = this.Circs.Count - 1,
-                        cant_aristas = 1;
-      
-                    while (aristas.Count > 0)
+                    int arm_ideal = this.Circs.Count - 1,// 2 operacion
+                        cant_aristas = 1;// 1 operacion
+
+                    while (aristas.Count > 0)// 1 operacion
                     {
-                        this_ar = aristas.Dequeue().Data;
-                        a_in = Clones.ContainsKey(this_ar.A.Name);
-                        b_in = Clones.ContainsKey(this_ar.B.Name);
-                        if((!a_in) && (!b_in))
+                        this_ar = aristas.Dequeue().Data;// 1 operacion
+                        a_in = Clones.ContainsKey(this_ar.A.Name);// 1 operacion
+                        b_in = Clones.ContainsKey(this_ar.B.Name);// 1 operacion
+                        if ((!a_in) && (!b_in))// 3 operacion
                         {
-                            pA = this_ar.A.Clone();
-                            pB = this_ar.B.Clone();
-                            Clones.Add(this_ar.B.Name, pB);
-                            Clones.Add(this_ar.A.Name,pA);
-                            Clones[this_ar.B.Name].Add_Vecino(this_ar.Clone(pA,pB), pA);
-                            cant_aristas++;
-                            unionFind.MakeSet(pA).Add(pB);
+                            pA = this_ar.A.Clone();// 2 operacion
+                            pB = this_ar.B.Clone();// 2 operacion
+                            Clones.Add(this_ar.B.Name, pB);// 1 operacion
+                            Clones.Add(this_ar.A.Name,pA);// 1 operacion
+                            Clones[this_ar.B.Name].Add_Vecino(this_ar.Clone(pA,pB), pA);// 3 operacion
+                            cant_aristas++;// 1 operacion
+                            Aceptadas.Add(this_ar);// 1 operacion
+                            unionFind.MakeSet(pA).Add(pB);// 1 operacion
                         }
                         else if (!b_in)
                         {
@@ -455,6 +470,7 @@ namespace Actividad2
                             Clones.Add(this_ar.B.Name, pB);
                             Clones[this_ar.B.Name].Add_Vecino(this_ar.Clone(pA, pB), pA);
                             cant_aristas++;
+                            Aceptadas.Add(this_ar);
                             unionFind.AddTo(pB, pA);
                         }
                         else if (!a_in)
@@ -464,6 +480,7 @@ namespace Actividad2
                             Clones.Add(this_ar.A.Name, pA);
                             Clones[this_ar.A.Name].Add_Vecino(this_ar.Clone(pA, pB), pB);
                             cant_aristas++;
+                            Aceptadas.Add(this_ar);
                             unionFind.AddTo(pA, pB);
                         }
                         else
@@ -474,10 +491,11 @@ namespace Actividad2
                             {
                                 Clones[this_ar.A.Name].Add_Vecino(this_ar.Clone(pA, pB), pB);
                                 cant_aristas++;
+                                Aceptadas.Add(this_ar);
                                 unionFind.Union(pA, pB);
                             }
                         }
-                        if (Clones.Count >= this.Circs.Count && cant_aristas >= arm_ideal)
+                        if (Clones.Count >= this.Circs.Count && cant_aristas >= arm_ideal)// 5 operacion
                         {
                             break;
                         }
@@ -487,11 +505,20 @@ namespace Actividad2
                     {
                         v.PaintLines(Arm_bitmap, Color.Red);
                     }
+                    DivdeLabel.Text = "Kruskal";
                     this.Kruskal_walk(ARM_root,Arm_bitmap,unionFind.Find(ARM_root));
+                    this.done_kruskal = true;
+                    ArrayList Result = new ArrayList();
+                    Result.Add(Aceptadas);
+                    Result.Add(Arm_bitmap);
+                    R1 = Aceptadas;
                 }
-                else if (this.path_maker == 2)
+                else if (this.path_maker == 2 && !done_prim)
                 {
-                    
+                    /*
+                     * PRIM
+                     */
+
                     Cant_change input_max = new Cant_change(this.Circs.Count - 1,"Inicio",0);
 
                     if(input_max.ShowDialog() == DialogResult.OK)
@@ -499,7 +526,7 @@ namespace Actividad2
                         UnionFindSet<vertice> unionFind = new UnionFindSet<vertice>();
                         Pqueue<Arista> visibles = new Pqueue<Arista>();
                         Dictionary<string,vertice> Clones = new Dictionary<string, vertice>();
-
+                        List<Arista> Aceptadas = new List<Arista>();
                         vertice s = this.Circs[input_max.cantidad].Clone(),pA,pB,Missing;
                         Clones.Add(s.Name, s);
                         unionFind.MakeSet(s);
@@ -536,6 +563,7 @@ namespace Actividad2
                                 pA = Clones[this_ar.A.Name];
                                 pB = this_ar.B.Clone();
                                 pA.Add_Vecino(this_ar.Clone(pA, pB), pB);
+                                Aceptadas.Add(this_ar);
                                 unionFind.AddTo(pB, pA);
                                 Clones.Add(pB.Name, pB);
                                 this.EnqueueVecinos(this_ar.B, visibles,this_ar);
@@ -545,6 +573,7 @@ namespace Actividad2
                                 pB = Clones[this_ar.B.Name];
                                 pA = this_ar.A.Clone();
                                 pB.Add_Vecino(this_ar.Clone(pA, pB), pA);
+                                Aceptadas.Add(this_ar);
                                 unionFind.AddTo(pA, pB);
                                 Clones.Add(pA.Name, pA);
                                 this.EnqueueVecinos(this_ar.A, visibles, this_ar);
@@ -558,14 +587,17 @@ namespace Actividad2
                                 this.EnqueueVecinos(Missing, visibles);
                             }
                         }
-                        Bitmap Prim_Bitmap = (Bitmap)this.Original.Clone();
+                        Bitmap Prim_Bitmap = (Bitmap)this.PictureBrute.Image.Clone();
                         foreach (vertice v in Clones.Values)
                         {
                             v.PaintLines(Prim_Bitmap, Color.Red);
                         }
-                        this.PictureDivide.Image = Prim_Bitmap;
+                        this.PictureBrute.Image = Prim_Bitmap;
                         s = Clones[Circs[input_max.cantidad].Name];
-                        this.Kruskal_walk(s, Prim_Bitmap, unionFind.Find(s));
+                        BruteLabel.Text = "Prim";
+                        this.Kruskal_walk(s, Prim_Bitmap, unionFind.Find(s),"b");
+                        done_prim = true;
+                        R2 = Aceptadas;
 
                     }
                 }
@@ -574,7 +606,7 @@ namespace Actividad2
 
         private void SetTimer()
         {
-            Update_agentes = new System.Timers.Timer(30);
+            Update_agentes = new System.Timers.Timer(35);
             Update_agentes.Elapsed += Move_Agentes;
             Update_agentes.AutoReset = true;
             Update_agentes.Enabled = true;
@@ -593,7 +625,6 @@ namespace Actividad2
                 Update_agentes.Close();
                 this.AgentsFinish = true;
                 this.Agentes.ForEach((x) => x.calc_recorrido());
-
             }
         }
 
@@ -612,7 +643,7 @@ namespace Actividad2
         private void CaminosDeAgenteMenuItem_Click(object sender, EventArgs e)
         {
             if (AgentsFinish)
-            {
+            { 
                 CaminosForm caminosf = new CaminosForm((Bitmap)this.PictureBrute.Image, this.Agentes);
                 caminosf.ShowDialog();
             }
@@ -637,15 +668,22 @@ namespace Actividad2
 
         }
 
-        private void Kruskal_walk(vertice arm_root,Bitmap bmp_arm, HashSet<vertice> camino)
+        private void Kruskal_walk(vertice arm_root,Bitmap bmp_arm, HashSet<vertice> camino,string w="d")
         {
             Agente.mapa = bmp_arm;
             Agente.mapa_limpio = (Bitmap)bmp_arm.Clone();
-            Agente.Box = this.PictureDivide;
+            Agente.Box = (w=="d") ? this.PictureDivide : this.PictureBrute;
             this.Agentes.Clear();
             this.threads.Clear();
 
             this.Agentes.Add(new Agente(arm_root));
+            this.Agentes[0].die += new Agente.Finish(() => {
+                if(done_kruskal && done_prim)
+                {
+                    DescribePK pK = new DescribePK((List<Arista>)R2, (List<Arista>)R1);
+                    pK.ShowDialog();
+                }
+            });
             this.threads.Add(new Thread(new ParameterizedThreadStart(Agentes[0].Cover_All)));
             this.threads[0].Name = "Kruskal worker";
             this.threads[0].Start(camino);
@@ -746,7 +784,7 @@ namespace Actividad2
 
         public override string ToString()
         {
-            return this.name;
+            return $"{this.name}Peso:{this.distancia}";
         }
 
         public Arista Clone()
@@ -1198,9 +1236,12 @@ namespace Actividad2
             Recorrer(origen.GetVecinos()[Estacion]);//1 operacion elemtal (la llamada a la funcion, no la funcion en si)
         }
 
-        private void Recorrer(Arista Camino,bool recurs=true)
+        private void Recorrer(Arista Camino,bool recurs=true,bool agreg=true)
         {
-            this.Historial.Add(Camino);
+            if (agreg)
+            {
+                this.Historial.Add(Camino);
+            }
             List<int[]> pasos = Camino.GetPoints();
             if(Ubicacion == new Point(pasos[0][0], pasos[0][1]))
             {
@@ -1249,6 +1290,10 @@ namespace Actividad2
         }
 
         #region <Actividad 4 Recorrer todo>
+
+        public delegate void Finish();
+
+        public event Finish die;
 
         public void Cover_All(object datos)
         {
@@ -1334,6 +1379,7 @@ namespace Actividad2
                 }
 
             }
+            die();
             Thread.CurrentThread.Abort();
             return;
         }
@@ -1348,7 +1394,7 @@ namespace Actividad2
             {
                 elegida = Recorrido.Pop();
                 this.Estacion = (elegida.B != this.Estacion) ? elegida.B : elegida.A;
-                this.Recorrer(elegida, false);
+                this.Recorrer(elegida, false,false);
             } while (this.Estacion != check_points.Peek());
             check_points.Pop();
             return;
@@ -1379,7 +1425,7 @@ namespace Actividad2
                 }
                 catch (InvalidOperationException)
                 {
-
+                    Thread.Sleep(10);
                     Agente.Del_Step(posiciones[agent.name]);
                 }
                 posiciones[agent.name] = agent.Ubicacion;

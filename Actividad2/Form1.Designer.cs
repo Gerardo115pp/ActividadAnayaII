@@ -36,7 +36,7 @@ namespace Actividad2
             this.MainMinBTN = new System.Windows.Forms.Button();
             this.MainResizeBTN = new System.Windows.Forms.Button();
             this.PicturePanel = new System.Windows.Forms.Panel();
-            this.label1 = new System.Windows.Forms.Label();
+            this.BruteLabel = new System.Windows.Forms.Label();
             this.DivdeLabel = new System.Windows.Forms.Label();
             this.PictureDivide = new System.Windows.Forms.PictureBox();
             this.PictureBrute = new System.Windows.Forms.PictureBox();
@@ -161,7 +161,7 @@ namespace Actividad2
             // 
             this.PicturePanel.AutoSize = true;
             this.PicturePanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
-            this.PicturePanel.Controls.Add(this.label1);
+            this.PicturePanel.Controls.Add(this.BruteLabel);
             this.PicturePanel.Controls.Add(this.DivdeLabel);
             this.PicturePanel.Controls.Add(this.PictureDivide);
             this.PicturePanel.Controls.Add(this.PictureBrute);
@@ -171,16 +171,16 @@ namespace Actividad2
             this.PicturePanel.Size = new System.Drawing.Size(1072, 629);
             this.PicturePanel.TabIndex = 2;
             // 
-            // label1
+            // BruteLabel
             // 
-            this.label1.AutoSize = true;
-            this.label1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(10)))), ((int)(((byte)(10)))), ((int)(((byte)(10)))));
-            this.label1.Font = new System.Drawing.Font("Russian Dollmaker", 43F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(668, 54);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(224, 41);
-            this.label1.TabIndex = 3;
-            this.label1.Text = "Fuerza Bruta";
+            this.BruteLabel.AutoSize = true;
+            this.BruteLabel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(10)))), ((int)(((byte)(10)))), ((int)(((byte)(10)))));
+            this.BruteLabel.Font = new System.Drawing.Font("Russian Dollmaker", 43F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.BruteLabel.Location = new System.Drawing.Point(668, 54);
+            this.BruteLabel.Name = "BruteLabel";
+            this.BruteLabel.Size = new System.Drawing.Size(224, 41);
+            this.BruteLabel.TabIndex = 3;
+            this.BruteLabel.Text = "Fuerza Bruta";
             // 
             // DivdeLabel
             // 
@@ -525,7 +525,7 @@ namespace Actividad2
         private System.Windows.Forms.ToolStripStatusLabel TooBien;
         private System.Windows.Forms.ToolStripStatusLabel FolderLabel;
         private System.Windows.Forms.Label DivdeLabel;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label BruteLabel;
         private System.Windows.Forms.ToolStripStatusLabel DivideStatus;
         private System.Windows.Forms.ToolStripStatusLabel BrutaStatus;
         private System.Windows.Forms.CheckBox EnumCheckBox;
