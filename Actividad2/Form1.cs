@@ -18,7 +18,8 @@ namespace Actividad2
                      IsJoined = false,
                      AgentsFinish = false,
                      done_prim = false,
-                     done_kruskal = false;
+                     done_kruskal = false,
+                     done_dijkstra = false;
         private int cant_agentes = -1,
                     path_maker = 0;
         private Point dragCursorPoint;
@@ -146,25 +147,35 @@ namespace Actividad2
             OpenFileDialog fileDialog = new OpenFileDialog();
             if(fileDialog.ShowDialog() == DialogResult.OK)
             {
+                this.RESET();
                 this.PictureDivide.Image = new Bitmap(fileDialog.FileName);
                 this.PictureBrute.Image = (Bitmap)this.PictureDivide.Image.Clone();
                 this.PictureDivide.BackgroundImage = this.PictureDivide.Image;
                 this.PictureBrute.BackgroundImage = this.PictureBrute.Image;
-                this.BrutaStatus.ForeColor = Color.Red;
-                this.DivideStatus.ForeColor = Color.Red;
                 this.Circs.Clear();
                 this.CirculosListBox.Items.Clear();
-                this.Agentes.Clear();
-                this.threads.Clear();
-                Agente.Reset();
-                this.cant_agentes = -1;
                 this.IsJoined = false;
-                this.AgentsFinish = false;
-                this.BruteLabel.Text = "Fuerza Bruta";
-                this.DivdeLabel.Text = "Divide";
-                done_prim = false;
-                done_kruskal = false;
             }
+        }
+
+        internal void RESET()
+        {
+            if (this.Original != null)
+            {
+                this.PictureDivide.Image = (Bitmap)this.Original.Clone();
+                this.PictureBrute.Image = (Bitmap)this.Original.Clone();
+            }
+            this.BrutaStatus.ForeColor = Color.Red;
+            this.DivideStatus.ForeColor = Color.Red;
+            this.Agentes.Clear();
+            this.threads.Clear();
+            Agente.Reset();
+            this.cant_agentes = -1;
+
+            this.BruteLabel.Text = "Fuerza Bruta";
+            this.DivdeLabel.Text = "Divide";
+            this.done_prim = false;
+            this.done_kruskal = false;
         }
 
         private void SaveBTN_Click(object sender, EventArgs e)
@@ -359,9 +370,9 @@ namespace Actividad2
                 v.PaintLines(bitmap, Color.LimeGreen);
             }
 
+            this.AddCrosses(bitmap);
             this.Original = (Bitmap)this.PictureBrute.Image.Clone();
             this.PictureDivide.Image = (Bitmap)this.Original.Clone();
-            this.AddCrosses(bitmap);
             this.IsJoined = true;
 
         }
@@ -381,8 +392,9 @@ namespace Actividad2
         {
             if (this.IsJoined)
             {
-                if(this.path_maker == 0 && !this.AgentsFinish)
+                if(this.path_maker == 0)
                 {
+                    this.RESET();
                     cant_agentes = (cant_agentes == -1) ? Circs.Count : cant_agentes;
                     List<int> usados = new List<int>();
                     int k;
@@ -405,6 +417,10 @@ namespace Actividad2
                         threads[h].Start();
                     }
                     SetTimer();
+                }
+                else if(done_kruskal && done_prim)
+                {
+                    this.RESET();
                 }
                 else if(this.path_maker == 1 && !done_kruskal)
                 {
@@ -518,7 +534,7 @@ namespace Actividad2
                     /*
                      * PRIM
                      */
-
+                    
                     Cant_change input_max = new Cant_change(this.Circs.Count - 1,"Inicio",0);
 
                     if(input_max.ShowDialog() == DialogResult.OK)
@@ -601,6 +617,30 @@ namespace Actividad2
 
                     }
                 }
+                else if (this.path_maker == 3 && !done_dijkstra)
+                {
+                    /*
+                     * DIJKSTRA
+                     */
+                    DijkstraOptions configs = new DijkstraOptions(this.Circs.Count-1);
+                    if (configs.ShowDialog() == DialogResult.OK)
+                    {
+                        this.RESET();
+                        int nacimiento = configs.Born,
+                            Predators = configs.Predators,
+                            destiny = configs.Destiny;
+                        Agente.mapa = (Bitmap)this.PictureDivide.Image.Clone();
+                        Agente.mapa_limpio = (Bitmap)Agente.mapa.Clone();
+                        Agente.Box = this.PictureDivide;
+                        this.Agentes.Add(new Agente(this.Circs[nacimiento]));
+                        this.Agentes[0].dieEvent += new Agente.Finish(() => { MessageBox.Show("Jon Snow Defeted the night king!");  });
+                        this.threads.Add(new Thread(new ParameterizedThreadStart(Agentes[0].Dijkstra)));
+                        this.threads[0].Name = "Jon Snow";
+                        this.threads[0].Start(this.Circs[destiny]);
+                        SetTimer();
+
+                    }
+                }
             }
         }
 
@@ -670,6 +710,7 @@ namespace Actividad2
 
         private void Kruskal_walk(vertice arm_root,Bitmap bmp_arm, HashSet<vertice> camino,string w="d")
         {
+            Agente.Reset();
             Agente.mapa = bmp_arm;
             Agente.mapa_limpio = (Bitmap)bmp_arm.Clone();
             Agente.Box = (w=="d") ? this.PictureDivide : this.PictureBrute;
@@ -677,7 +718,7 @@ namespace Actividad2
             this.threads.Clear();
 
             this.Agentes.Add(new Agente(arm_root));
-            this.Agentes[0].die += new Agente.Finish(() => {
+            this.Agentes[0].dieEvent += new Agente.Finish(() => {
                 if(done_kruskal && done_prim)
                 {
                     DescribePK pK = new DescribePK((List<Arista>)R2, (List<Arista>)R1);
@@ -800,10 +841,10 @@ namespace Actividad2
             return new Arista(this.points, a, b);
         }
   
-        public int Len()
+        /*public int Len()
         {
             return this.points.Count;
-        }
+        }*/
 
         public double GetDist()
         {
@@ -1116,6 +1157,9 @@ namespace Actividad2
 
         public string getName()
         {
+            /*
+             * Deprecado
+             */
             return this.name;
         }
 
@@ -1293,7 +1337,7 @@ namespace Actividad2
 
         public delegate void Finish();
 
-        public event Finish die;
+        public event Finish dieEvent;
 
         public void Cover_All(object datos)
         {
@@ -1379,7 +1423,7 @@ namespace Actividad2
                 }
 
             }
-            die();
+            dieEvent();
             Thread.CurrentThread.Abort();
             return;
         }
@@ -1401,6 +1445,105 @@ namespace Actividad2
         }
 
         #endregion </Actividad 4 Recorrer todo>
+
+        #region <Actividad 5 Dijkstra>
+
+        public void Dijkstra(object datos)
+        {
+            vertice destino = (vertice)datos,
+                    verticieActual;
+            /*
+             * El formato de las etiquetas sera vertice:[a donde lleva,peso,prosedencia]
+             */
+            if (destino == Estacion)
+            {
+                Die();
+            }
+            Dictionary<vertice, ArrayList> Etiquetas = new Dictionary<vertice, ArrayList>();
+            /*
+             * Etiquetas es donde se guadaran los datos de todos los vertices
+             */
+            ArrayList Etiqueta;
+            Pqueue<ArrayList> opciones = new Pqueue<ArrayList>();// Aqui solo guardare las opciones actuales 
+            verticieActual = Estacion;
+            Etiqueta = hacerEtiqueta(verticieActual, 0, null);
+            Etiquetas.Add(verticieActual,Etiqueta);
+            opciones.Enqueue(Etiqueta,0);
+            while (Etiqueta[0] != destino && opciones.Count > 0)
+            {
+                Etiqueta = opciones.Dequeue().Data;
+                verticieActual = (vertice)Etiqueta[0];
+                this.enqueueVecionos(verticieActual, opciones, (double)Etiqueta[1],Etiquetas);
+
+            }
+            if (Etiqueta[0] != destino && opciones.Count <= 0)
+            {
+                this.Die();
+            }
+            opciones.Clear();
+            opciones.Enqueue(Etiqueta, (double)Etiqueta[1]);
+            while (true)
+            {
+                Etiqueta = Etiquetas[(vertice)Etiqueta[2]];
+                if (Etiqueta[2] != null)
+                {
+                    opciones.Enqueue(Etiqueta, (double)Etiqueta[1]);
+                }
+                else
+                {
+                    break;
+                }
+            }
+            while(Estacion != destino)
+            {
+                verticieActual = this.Estacion;
+                this.Estacion = (vertice)opciones.Dequeue().Data[0];
+                this.Recorrer(verticieActual.GetVecinos()[Estacion],false);
+
+            }
+            this.Die();
+
+        }
+
+        private void enqueueVecionos(vertice v,Pqueue<ArrayList> cola,double acumulado, Dictionary<vertice, ArrayList> Etiquetas)
+        {
+            Dictionary<vertice, Arista> Vecinos = v.GetVecinos();
+            ArrayList Etiqueta;
+            foreach(vertice vecino in Vecinos.Keys)
+            {
+                Etiqueta = hacerEtiqueta(vecino, (Vecinos[vecino].GetDist() + acumulado), v);
+                if (Etiquetas.ContainsKey(vecino))
+                {
+                    if ((double)Etiquetas[vecino][1] > (double)Etiqueta[1])
+                    {
+                        Etiquetas[vecino][1] = Etiqueta[1];
+                        Etiquetas[vecino][2] = Etiqueta[2];
+                    }
+                }
+                else
+                {
+                    cola.Enqueue(Etiqueta, (double)Etiqueta[1]);
+                    Etiquetas[vecino] = Etiqueta;
+                }
+            }
+        }
+
+        private ArrayList hacerEtiqueta(vertice v,double peso,vertice prosedencia)
+        {
+            ArrayList etiqueta = new ArrayList();
+            etiqueta.Add(v);
+            etiqueta.Add(peso);
+            etiqueta.Add(prosedencia);
+            return etiqueta;
+        }
+
+        private void Die()
+        {
+            dieEvent();
+            Thread.CurrentThread.Abort();
+        }
+
+        #endregion </Actividad 5 Dijkstra>
 
         #region <metodos para update>
 

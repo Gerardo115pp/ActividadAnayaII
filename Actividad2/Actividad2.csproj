@@ -65,6 +65,12 @@
     <Compile Include="DescribePK.Designer.cs">
       <DependentUpon>DescribePK.cs</DependentUpon>
     </Compile>
+    <Compile Include="DijkstraOptions.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DijkstraOptions.Designer.cs">
+      <DependentUpon>DijkstraOptions.cs</DependentUpon>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -93,6 +99,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="DescribePK.resx">
       <DependentUpon>DescribePK.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DijkstraOptions.resx">
+      <DependentUpon>DijkstraOptions.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>

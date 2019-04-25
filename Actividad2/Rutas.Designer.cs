@@ -35,6 +35,7 @@
             this.Estandar = new System.Windows.Forms.RadioButton();
             this.op_kruskal = new System.Windows.Forms.RadioButton();
             this.op_prim = new System.Windows.Forms.RadioButton();
+            this.DijkstraBTN = new System.Windows.Forms.RadioButton();
             this.Controls_panel.SuspendLayout();
             this.Choices.SuspendLayout();
             this.SuspendLayout();
@@ -89,10 +90,11 @@
             this.Choices.Controls.Add(this.Estandar);
             this.Choices.Controls.Add(this.op_kruskal);
             this.Choices.Controls.Add(this.op_prim);
+            this.Choices.Controls.Add(this.DijkstraBTN);
             this.Choices.Font = new System.Drawing.Font("Fatherland Faker", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Choices.Location = new System.Drawing.Point(155, 107);
+            this.Choices.Location = new System.Drawing.Point(101, 107);
             this.Choices.Name = "Choices";
-            this.Choices.Size = new System.Drawing.Size(251, 39);
+            this.Choices.Size = new System.Drawing.Size(349, 39);
             this.Choices.TabIndex = 1;
             // 
             // Estandar
@@ -143,6 +145,22 @@
             this.op_prim.UseVisualStyleBackColor = false;
             this.op_prim.CheckedChanged += new System.EventHandler(this.op_kruskal_CheckedChanged);
             // 
+            // DijkstraBTN
+            // 
+            this.DijkstraBTN.Appearance = System.Windows.Forms.Appearance.Button;
+            this.DijkstraBTN.AutoSize = true;
+            this.DijkstraBTN.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.DijkstraBTN.Font = new System.Drawing.Font("Russian Dollmaker", 22F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.DijkstraBTN.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(78)))), ((int)(((byte)(159)))), ((int)(((byte)(8)))));
+            this.DijkstraBTN.Location = new System.Drawing.Point(254, 3);
+            this.DijkstraBTN.Name = "DijkstraBTN";
+            this.DijkstraBTN.Size = new System.Drawing.Size(92, 33);
+            this.DijkstraBTN.TabIndex = 3;
+            this.DijkstraBTN.TabStop = true;
+            this.DijkstraBTN.Text = "Dijkstra";
+            this.DijkstraBTN.UseVisualStyleBackColor = false;
+            this.DijkstraBTN.CheckedChanged += new System.EventHandler(this.op_kruskal_CheckedChanged);
+            // 
             // Rutas
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -173,5 +191,6 @@
         private System.Windows.Forms.RadioButton op_kruskal;
         private System.Windows.Forms.RadioButton Estandar;
         private System.Windows.Forms.RadioButton op_prim;
+        private System.Windows.Forms.RadioButton DijkstraBTN;
     }
 }

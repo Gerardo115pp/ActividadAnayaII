@@ -133,6 +133,11 @@ namespace Actividad2
             return null;
         }
 
+        public void Clear()
+        {
+            this.root = null;
+        }
+
     }
 
     class UnionFindSet<T>
