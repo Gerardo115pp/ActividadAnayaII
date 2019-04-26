@@ -19,8 +19,9 @@ namespace Actividad2
         {
             InitializeComponent();
             this.BornUpDown.Maximum = cant_vexs;
-            this.DepredadoraUpDown.Maximum = cant_vexs;
+            this.DepredadoraUpDown.Maximum = cant_vexs-1;
             this.DestinoUpDown.Maximum = cant_vexs;
+            this.DestinoUpDown.Value = cant_vexs;
         }
 
         public int Born

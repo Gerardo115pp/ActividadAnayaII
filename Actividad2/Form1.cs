@@ -14,6 +14,23 @@ namespace Actividad2
 {
     public partial class MainWindow : Form
     {
+
+        static public vertice randChoice(List<vertice> arr)
+        {
+            return arr[new Random().Next(arr.Count)];
+        }
+
+        static public vertice randChoice(List<vertice> arr, List<vertice> compare) 
+        {
+            vertice v;
+            do
+            {
+                v = randChoice(arr);
+            } while (compare.Contains(v));
+
+            return v;
+        }
+
         private bool dragging = false,
                      IsJoined = false,
                      AgentsFinish = false,
@@ -155,6 +172,7 @@ namespace Actividad2
                 this.Circs.Clear();
                 this.CirculosListBox.Items.Clear();
                 this.IsJoined = false;
+                Arista.Aristas.Clear();
             }
         }
 
@@ -636,7 +654,22 @@ namespace Actividad2
                         this.Agentes[0].dieEvent += new Agente.Finish(() => { MessageBox.Show("Jon Snow Defeted the night king!");  });
                         this.threads.Add(new Thread(new ParameterizedThreadStart(Agentes[0].Dijkstra)));
                         this.threads[0].Name = "Jon Snow";
+
+                        List<vertice> seleccionados = new List<vertice>();
+                        seleccionados.Add(this.Circs[nacimiento]);
+                        for(int h=1;h <= Predators;h++)
+                        {
+                            seleccionados.Add(MainWindow.randChoice(this.Circs,seleccionados));
+                            this.Agentes.Add(new Agente(seleccionados[h],true));
+                            this.Agentes[h].dieEvent += new Agente.Finish(() => { MessageBox.Show("WhiteWalker Defeted!"); });
+                            this.threads.Add(new Thread(new ParameterizedThreadStart(Agentes[h].DFS)));
+                            this.threads[h].Name = $"WhiteWalker {seleccionados[h].Name}";
+                        }
                         this.threads[0].Start(this.Circs[destiny]);
+                        for(int h=1;h < this.threads.Count; h++)
+                        {
+                            this.threads[h].Start();
+                        }
                         SetTimer();
 
                     }
@@ -807,6 +840,14 @@ namespace Actividad2
 
     public class Arista
     {
+        static Dictionary<string, Arista> aristas = new Dictionary<string, Arista>();
+
+        static public Dictionary<string,Arista> Aristas
+        {
+            get { return Arista.aristas; }
+        } 
+
+
         List<int[]> points;
         vertice pA, pB;
         string name;
@@ -821,6 +862,7 @@ namespace Actividad2
             this.name = $"({pA.getName()} Entre {pB.getName()})";
             this.painted = false;
             this.distancia = calc_distancia();
+            Arista.Aristas.Add(this.name, this);
         }
 
         public override string ToString()
@@ -1090,7 +1132,7 @@ namespace Actividad2
             }
         }
 
-        public void breadth(vertice vex = null)
+        public void Map(Action<vertice> func,vertice vex = null)
         {
             if (vex == null)
             {
@@ -1107,6 +1149,7 @@ namespace Actividad2
                     if (!v.IsVisited())
                     {
                         v.Visit();
+                        func(v);
                         cola.Enqueue(v);
                     }
                 }
@@ -1188,6 +1231,7 @@ namespace Actividad2
 
     public class Agente
     {
+        static Bitmap EvilSprite = new Bitmap(Image.FromFile(@"C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\imgs\AgentesEvil.png"), new Size(40, 40));
         static Bitmap sprite = new Bitmap(Image.FromFile(@"C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\imgs\Agentes.png"),new Size(40,40));
         static public Bitmap mapa, mapa_limpio;
         static public PictureBox Box;
@@ -1198,18 +1242,22 @@ namespace Actividad2
         Point Ubicacion;
         Bitmap SelfSprite;
         string name;
+        bool isEvil;
         double? distancia = null;
 
-        public Agente(vertice estacion)
+        public Agente( vertice estacion, bool isEvil=false )
         {
             this.Estacion = estacion;
             Visitados.Add(estacion);
             this.Ubicacion = estacion.GetPoint();
             this.name = estacion.getName();
             Agente.posiciones.Add(estacion.getName(), new Point(this.Ubicacion.X,this.Ubicacion.Y));
+            this.isEvil = isEvil;
             this.SelfSprite = this.DrawSelf(); 
             this.Nacer();
         }
+
+        #region <Actividad 3>
 
         public double? Distancia
         {
@@ -1222,7 +1270,7 @@ namespace Actividad2
             {
                 return Visitados.Count;
             }
-        } 
+        }
 
         public List<vertice> GetVisitados()
         {
@@ -1241,9 +1289,9 @@ namespace Actividad2
 
         private Bitmap DrawSelf()
         {
-            Bitmap self = (Bitmap)Agente.sprite.Clone();
+            Bitmap self = (!isEvil) ? (Bitmap)Agente.sprite.Clone() : (Bitmap)Agente.EvilSprite.Clone();
             Graphics graphics = Graphics.FromImage(self);
-            graphics.DrawString(this.name, new Font("Arial",20), new SolidBrush(Color.FromArgb(255,200,40,40)), 5, 5);
+            graphics.DrawString(this.name, new Font("Arial", 20), new SolidBrush(Color.FromArgb(255, 200, 40, 40)), 5, 5);
             return self;
         }
 
@@ -1272,7 +1320,7 @@ namespace Actividad2
                 int eleccion = new Random().Next(opciones.Count);//2 operaciones elementales
                 this.Estacion = opciones.Keys.ToList<vertice>()[eleccion];// 2 operaciones elementales
                 opciones.Remove(Estacion);// una operacion elemental
-            } while(Historial.Contains(origen.GetVecinos()[Estacion]));
+            } while (Historial.Contains(origen.GetVecinos()[Estacion]));
             if (!Visitados.Contains(Estacion))// una operacion elemental
             {
                 Visitados.Add(Estacion);// una operacion elemental
@@ -1280,24 +1328,24 @@ namespace Actividad2
             Recorrer(origen.GetVecinos()[Estacion]);//1 operacion elemtal (la llamada a la funcion, no la funcion en si)
         }
 
-        private void Recorrer(Arista Camino,bool recurs=true,bool agreg=true)
+        private void Recorrer(Arista Camino, bool recurs = true, bool agreg = true)
         {
             if (agreg)
             {
                 this.Historial.Add(Camino);
             }
             List<int[]> pasos = Camino.GetPoints();
-            if(Ubicacion == new Point(pasos[0][0], pasos[0][1]))
+            if (Ubicacion == new Point(pasos[0][0], pasos[0][1]))
             {
-                for(int h = 0; h < (pasos.Count - 11); h += 10)
+                for (int h = 0; h < (pasos.Count - 11); h += 10)
                 {
                     Dar_Paso(pasos[h]);
                 }
                 Dar_Paso(Estacion.GetPos());
             }
-            else if(Ubicacion == new Point(pasos[(pasos.Count-1)][0], pasos[(pasos.Count - 1)][1]))
+            else if (Ubicacion == new Point(pasos[(pasos.Count - 1)][0], pasos[(pasos.Count - 1)][1]))
             {
-                for(int h = (pasos.Count - 1); h >= 20; h -= 10)
+                for (int h = (pasos.Count - 1); h >= 20; h -= 10)
                 {
                     Dar_Paso(pasos[h]);
                 }
@@ -1311,9 +1359,9 @@ namespace Actividad2
             {
                 Elegir_Camino();
             }
-            
+
         }
-        
+
         private void Dar_Paso(int[] pos)
         {
             Ubicacion = new Point(pos[0], pos[1]);
@@ -1322,7 +1370,7 @@ namespace Actividad2
 
         public void calc_recorrido()
         {
-            if((distancia == null))
+            if ((distancia == null))
             {
                 double r = 0;
                 foreach (Arista a in Historial)
@@ -1332,6 +1380,8 @@ namespace Actividad2
                 this.distancia = r;
             }
         }
+
+        #endregion </Actividad 3>
 
         #region <Actividad 4 Recorrer todo>
 
@@ -1499,7 +1549,6 @@ namespace Actividad2
                 verticieActual = this.Estacion;
                 this.Estacion = (vertice)opciones.Dequeue().Data[0];
                 this.Recorrer(verticieActual.GetVecinos()[Estacion],false);
-
             }
             this.Die();
 
@@ -1541,6 +1590,31 @@ namespace Actividad2
         {
             dieEvent();
             Thread.CurrentThread.Abort();
+        }
+
+        public void DFS(object datos = null)
+        {
+            vertice vengoDe = (vertice)datos;
+            if (vengoDe == null)
+            {
+                vengoDe = this.Estacion;
+            }
+            vengoDe.Visit();
+            Dictionary<vertice, Arista> vecinos = vengoDe.GetVecinos();
+            foreach (vertice v in vecinos.Keys)
+            {
+                if (!Visitados.Contains(v))
+                {
+                    vengoDe = this.Estacion;
+                    this.Estacion = v;
+                    this.Recorrer(vecinos[this.Estacion],false);
+                    this.Visitados.Add(v);
+                    this.DFS(v);
+                    this.Estacion = vengoDe;
+                    this.Recorrer(vecinos[v], false);
+                }
+            }
+            //this.DFS();
         }
 
         #endregion </Actividad 5 Dijkstra>
