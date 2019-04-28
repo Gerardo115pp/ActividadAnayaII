@@ -12,6 +12,9 @@ namespace Actividad2
 {
     public partial class DijkstraOptions : Form
     {
+        bool dragging = false;
+        private Point dragCursorPoint;
+        private Point dragFormPoint;
         int BornVex = 0,
             Depredadoras = 0,
             destiny = 0;
@@ -64,5 +67,28 @@ namespace Actividad2
                 this.destiny = (int)target.Value;
             }
         }
+
+
+        private void ControlesChange_MouseUp(object sender, MouseEventArgs e)
+        {
+            this.dragging = false;
+        }
+
+        private void ControlesChange_MouseDown(object sender, MouseEventArgs e)
+        {
+            dragging = true;
+            dragCursorPoint = Cursor.Position;
+            dragFormPoint = this.Location;
+        }
+
+        private void ControlesChange_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (dragging)
+            {
+                Point dif = Point.Subtract(Cursor.Position, new Size(dragCursorPoint));
+                this.Location = Point.Add(dragFormPoint, new Size(dif));
+            }
+        }
+
     }
 }

@@ -54,6 +54,9 @@
             this.ControlPanel.Name = "ControlPanel";
             this.ControlPanel.Size = new System.Drawing.Size(499, 41);
             this.ControlPanel.TabIndex = 2;
+            this.ControlPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.ControlesChange_MouseDown);
+            this.ControlPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.ControlesChange_MouseMove);
+            this.ControlPanel.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ControlesChange_MouseUp);
             // 
             // Title
             // 
@@ -65,6 +68,9 @@
             this.Title.Size = new System.Drawing.Size(143, 27);
             this.Title.TabIndex = 3;
             this.Title.Text = "D I J K S T R A";
+            this.Title.MouseDown += new System.Windows.Forms.MouseEventHandler(this.ControlesChange_MouseDown);
+            this.Title.MouseMove += new System.Windows.Forms.MouseEventHandler(this.ControlesChange_MouseMove);
+            this.Title.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ControlesChange_MouseUp);
             // 
             // MainCloseBTN
             // 

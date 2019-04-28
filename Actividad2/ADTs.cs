@@ -136,6 +136,7 @@ namespace Actividad2
         public void Clear()
         {
             this.root = null;
+            this.len = 0;
         }
 
     }

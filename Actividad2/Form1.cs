@@ -172,7 +172,8 @@ namespace Actividad2
                 this.Circs.Clear();
                 this.CirculosListBox.Items.Clear();
                 this.IsJoined = false;
-                Arista.Aristas.Clear();
+                vertice.RESET();
+                Arista.RESET();
             }
         }
 
@@ -189,6 +190,7 @@ namespace Actividad2
             this.threads.Clear();
             Agente.Reset();
             this.cant_agentes = -1;
+
 
             this.BruteLabel.Text = "Fuerza Bruta";
             this.DivdeLabel.Text = "Divide";
@@ -651,7 +653,7 @@ namespace Actividad2
                         Agente.mapa_limpio = (Bitmap)Agente.mapa.Clone();
                         Agente.Box = this.PictureDivide;
                         this.Agentes.Add(new Agente(this.Circs[nacimiento]));
-                        this.Agentes[0].dieEvent += new Agente.Finish(() => { MessageBox.Show("Jon Snow Defeted the night king!");  });
+                        this.Agentes[0].dieEvent += new Agente.Finish(this.killEvilAgents);
                         this.threads.Add(new Thread(new ParameterizedThreadStart(Agentes[0].Dijkstra)));
                         this.threads[0].Name = "Jon Snow";
 
@@ -661,14 +663,17 @@ namespace Actividad2
                         {
                             seleccionados.Add(MainWindow.randChoice(this.Circs,seleccionados));
                             this.Agentes.Add(new Agente(seleccionados[h],true));
-                            this.Agentes[h].dieEvent += new Agente.Finish(() => { MessageBox.Show("WhiteWalker Defeted!"); });
+                            this.Agentes[h].Killagente += new Agente.KillAgent(this.killTheGoodAgent);
                             this.threads.Add(new Thread(new ParameterizedThreadStart(Agentes[h].DFS)));
                             this.threads[h].Name = $"WhiteWalker {seleccionados[h].Name}";
                         }
                         this.threads[0].Start(this.Circs[destiny]);
+                        List<Agente> contrato = new List<Agente>();
+                        contrato.Add(null);
+                        contrato.Add(this.Agentes[0]);
                         for(int h=1;h < this.threads.Count; h++)
                         {
-                            this.threads[h].Start();
+                            this.threads[h].Start(contrato);
                         }
                         SetTimer();
 
@@ -798,6 +803,25 @@ namespace Actividad2
         }
         #endregion </Actividad 4>
 
+        #region <Actividad 5>
+
+        private void killEvilAgents()
+        {
+            //MessageBox.Show("Jon Snow Defeted the night king!");
+            for (int h=1;h< this.threads.Count; h++)
+            {
+                this.threads[h].Abort();
+            }
+        }
+
+        private void killTheGoodAgent()
+        {
+            this.threads[0].Abort();
+            this.killEvilAgents();
+        }
+
+        #endregion </Actividad 5>
+
         #endregion </Script>
 
     }
@@ -847,6 +871,10 @@ namespace Actividad2
             get { return Arista.aristas; }
         } 
 
+        static public void RESET()
+        {
+            Arista.aristas.Clear();
+        }
 
         List<int[]> points;
         vertice pA, pB;
@@ -862,7 +890,10 @@ namespace Actividad2
             this.name = $"({pA.getName()} Entre {pB.getName()})";
             this.painted = false;
             this.distancia = calc_distancia();
-            Arista.Aristas.Add(this.name, this);
+            if (Arista.Aristas.ContainsKey(this.name))
+            {
+                Arista.Aristas.Add(this.name, this);
+            }
         }
 
         public override string ToString()
@@ -951,6 +982,35 @@ namespace Actividad2
 
     public class vertice
     {
+        static List<vertice> Vertices = new List<vertice>();
+
+        static public bool isAny(int x, int y)
+        {
+            foreach(vertice v in vertice.Vertices)
+            {
+                if (v.iSelf(x, y))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        static public void RESET()
+        {
+            vertice.Vertices.Clear();
+        }
+
+        static public int Count
+        {
+            get { return Vertices.Count; }
+        }
+
+        static public vertice getVex(int pos)
+        {
+            return vertice.Vertices[pos];
+        }
+
         int[] cords;
         int radio;
         string name;
@@ -964,6 +1024,7 @@ namespace Actividad2
             this.visited = false;
             aristas = new Dictionary<vertice,Arista>();
             this.radio = radio;
+            vertice.Vertices.Add(this);
         }
 
         public override string ToString()
@@ -1236,13 +1297,16 @@ namespace Actividad2
         static public Bitmap mapa, mapa_limpio;
         static public PictureBox Box;
         static Dictionary<string, Point> posiciones = new Dictionary<string, Point>();
+        static HashSet<Agente> evilAgents = new HashSet<Agente>();
         List<Arista> Historial = new List<Arista>();
+        Arista aristaActiva;
         List<vertice> Visitados = new List<vertice>();
         vertice Estacion;
         Point Ubicacion;
         Bitmap SelfSprite;
         string name;
-        bool isEvil;
+        bool isEvil,
+             isAlive;
         double? distancia = null;
 
         public Agente( vertice estacion, bool isEvil=false )
@@ -1253,6 +1317,14 @@ namespace Actividad2
             this.name = estacion.getName();
             Agente.posiciones.Add(estacion.getName(), new Point(this.Ubicacion.X,this.Ubicacion.Y));
             this.isEvil = isEvil;
+            if (isEvil)
+            {
+                Agente.evilAgents.Add(this);
+            }
+            else
+            {
+                this.isAlive = true;
+            }
             this.SelfSprite = this.DrawSelf(); 
             this.Nacer();
         }
@@ -1543,15 +1615,100 @@ namespace Actividad2
                 {
                     break;
                 }
-            }
+            }/*
             while(Estacion != destino)
             {
                 verticieActual = this.Estacion;
                 this.Estacion = (vertice)opciones.Dequeue().Data[0];
                 this.Recorrer(verticieActual.GetVecinos()[Estacion],false);
-            }
+            }*/
+            this.recorrerDijkstra(opciones);
             this.Die();
 
+        }
+
+        private void recorrerDijkstra(Pqueue<ArrayList> Camino)
+        {
+            vertice destino;
+            Arista Elegida;
+            ArrayList etiqueta;
+
+            while(Camino.Count > 0)
+            {
+                etiqueta = Camino.Dequeue().Data;
+                destino = (vertice)etiqueta[0];
+                Elegida = this.Estacion.GetVecinos()[destino];
+                while(!Agente.evilAgents.All((agente => { return this.isSafe(agente, destino, Elegida); })))
+                {
+                    //MessageBox.Show("Es peligroso!!!!!!!");
+                    Thread.Sleep(300);
+                }
+                this.Estacion = destino;
+                this.Recorrer(Elegida, false);
+            }
+        }
+
+        private void RecorrerconMaldad(Arista Camino,Agente prey, bool agreg = true)
+        {
+            if (agreg)
+            {
+                this.Historial.Add(Camino);
+            }
+            this.aristaActiva = Camino;
+            List<int[]> pasos = Camino.GetPoints();
+            if (Ubicacion == new Point(pasos[0][0], pasos[0][1]))
+            {
+                for (int h = 0; h < (pasos.Count - 11); h += 10)
+                {
+                    Dar_Paso(pasos[h]);
+                    SearchNdDestroy(prey, pasos, h);
+                }
+                Dar_Paso(Estacion.GetPos());
+            }
+            else if (Ubicacion == new Point(pasos[(pasos.Count - 1)][0], pasos[(pasos.Count - 1)][1]))
+            {
+                for (int h = (pasos.Count - 1); h >= 20; h -= 10)
+                {
+                    Dar_Paso(pasos[h]);
+                    SearchNdDestroy(prey, pasos, h, false);
+                }
+                Dar_Paso(Estacion.GetPos());
+            }
+            else
+            {
+                MessageBox.Show("Yo no deberia aparecer... que extraño 0.o");
+            }
+
+
+        }
+
+        private void SearchNdDestroy(Agente prey,List<int[]> pasos,int h, bool aumento=true)
+        {
+            while(h < 20 || h == (pasos.Count - 1))
+            {
+                if ((prey.Ubicacion.X == pasos[h][0]) && prey.Ubicacion.Y == pasos[h][1])
+                {
+                    if (!vertice.isAny(pasos[h][0],pasos[h][1]))
+                    {
+                        MessageBox.Show("Jon snow has died T_T");
+                        Killagente();
+                    }
+                }
+                h = (aumento) ? (h + 1) : (h - 1);
+            }
+        }
+
+        private bool isSafe(Agente agente, vertice destino, Arista Ruta)
+        {
+            if ((agente.Estacion == destino) && agente.isEvil)
+            {
+                return false;
+            }
+            else if (agente.Estacion == this.Estacion && agente.aristaActiva == Ruta)
+            {
+                return false;
+            }
+            return true;
         }
 
         private void enqueueVecionos(vertice v,Pqueue<ArrayList> cola,double acumulado, Dictionary<vertice, ArrayList> Etiquetas)
@@ -1588,17 +1745,50 @@ namespace Actividad2
 
         private void Die()
         {
+            if (!this.isEvil)
+            {
+                STDselector nextselector = new STDselector("S i g u i e n t e", vertice.Count);
+                if (nextselector.ShowDialog() == DialogResult.OK)
+                {
+                    this.Dijkstra(vertice.getVex(nextselector.Valor));
+                    return;
+                }
+                this.isAlive = false;
+            }
             dieEvent();
             Thread.CurrentThread.Abort();
         }
 
-        public void DFS(object datos = null)
+        public void DFS(object datos)
         {
-            vertice vengoDe = (vertice)datos;
-            if (vengoDe == null)
+            List<Agente> data = (List<Agente>)datos;
+            vertice vengoDe = this.Estacion;
+            Agente prey = data[1];
+            vengoDe.Visit();
+            Dictionary<vertice, Arista> vecinos = vengoDe.GetVecinos();
+            while (prey.isAlive)
             {
-                vengoDe = this.Estacion;
+                foreach (vertice v in vecinos.Keys)
+                {
+                    if (!Visitados.Contains(v))
+                    {
+                        vengoDe = this.Estacion;
+                        this.Estacion = v;
+                        this.RecorrerconMaldad(vecinos[this.Estacion],prey);
+                        this.Visitados.Add(v);
+                        this.DFS(v,prey);
+                        this.Estacion = vengoDe;
+                        this.RecorrerconMaldad(vecinos[v],prey);
+                    }
+                }
+                this.Visitados.Clear();
             }
+            //this.Die();
+        }
+
+        public void DFS(vertice vengoDe,Agente prey)
+        {
+
             vengoDe.Visit();
             Dictionary<vertice, Arista> vecinos = vengoDe.GetVecinos();
             foreach (vertice v in vecinos.Keys)
@@ -1607,15 +1797,19 @@ namespace Actividad2
                 {
                     vengoDe = this.Estacion;
                     this.Estacion = v;
-                    this.Recorrer(vecinos[this.Estacion],false);
+                    this.RecorrerconMaldad(vecinos[this.Estacion],prey);
                     this.Visitados.Add(v);
-                    this.DFS(v);
+                    this.DFS(v,prey);
                     this.Estacion = vengoDe;
-                    this.Recorrer(vecinos[v], false);
+                    this.RecorrerconMaldad(vecinos[v],prey, false);
                 }
             }
-            //this.DFS();
         }
+
+        public delegate void KillAgent();
+
+        public event KillAgent Killagente;
+
 
         #endregion </Actividad 5 Dijkstra>
 
@@ -1658,6 +1852,7 @@ namespace Actividad2
             mapa_limpio = null;
             Box = null;
             posiciones = new Dictionary<string, Point>();
+            evilAgents.Clear();
 
         }
 
