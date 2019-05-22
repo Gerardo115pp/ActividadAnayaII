@@ -60,6 +60,8 @@ namespace Actividad2
             this.maximoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.elegirCantidadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.CaminosDeAgenteMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.divideYVencerasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fuerzaBrutaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ControlPanel.SuspendLayout();
             this.PicturePanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PictureDivide)).BeginInit();
@@ -418,7 +420,9 @@ namespace Actividad2
             this.BTN_Agentes.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.algoritmosToolStripMenuItem,
             this.CantidadDeAgentesToolStripMenuItem,
-            this.CaminosDeAgenteMenuItem});
+            this.CaminosDeAgenteMenuItem,
+            this.divideYVencerasToolStripMenuItem,
+            this.fuerzaBrutaToolStripMenuItem});
             this.BTN_Agentes.Image = ((System.Drawing.Image)(resources.GetObject("BTN_Agentes.Image")));
             this.BTN_Agentes.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.BTN_Agentes.Name = "BTN_Agentes";
@@ -463,6 +467,21 @@ namespace Actividad2
             this.CaminosDeAgenteMenuItem.Size = new System.Drawing.Size(182, 22);
             this.CaminosDeAgenteMenuItem.Text = "Caminos de Agente";
             this.CaminosDeAgenteMenuItem.Click += new System.EventHandler(this.CaminosDeAgenteMenuItem_Click);
+            // 
+            // divideYVencerasToolStripMenuItem
+            // 
+            this.divideYVencerasToolStripMenuItem.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.divideYVencerasToolStripMenuItem.Name = "divideYVencerasToolStripMenuItem";
+            this.divideYVencerasToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.divideYVencerasToolStripMenuItem.Text = "Divide y venceras";
+            this.divideYVencerasToolStripMenuItem.Click += new System.EventHandler(this.DivideStatus_Click);
+            // 
+            // fuerzaBrutaToolStripMenuItem
+            // 
+            this.fuerzaBrutaToolStripMenuItem.Name = "fuerzaBrutaToolStripMenuItem";
+            this.fuerzaBrutaToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.fuerzaBrutaToolStripMenuItem.Text = "Fuerza Bruta";
+            this.fuerzaBrutaToolStripMenuItem.Click += new System.EventHandler(this.fuerzaBrutaToolStripMenuItem_Click);
             // 
             // MainWindow
             // 
@@ -535,6 +554,8 @@ namespace Actividad2
         private System.Windows.Forms.ToolStripMenuItem elegirCantidadToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem CaminosDeAgenteMenuItem;
         private System.Windows.Forms.ToolStripMenuItem algoritmosToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem divideYVencerasToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fuerzaBrutaToolStripMenuItem;
     }
 }
 

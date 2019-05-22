@@ -65,7 +65,7 @@
             // 
             // ControlsCancel
             // 
-            this.ControlsCancel.DialogResult = System.Windows.Forms.DialogResult.Abort;
+            this.ControlsCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.ControlsCancel.Dock = System.Windows.Forms.DockStyle.Right;
             this.ControlsCancel.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(138)))), ((int)(((byte)(219)))), ((int)(((byte)(8)))));
             this.ControlsCancel.FlatAppearance.BorderSize = 2;

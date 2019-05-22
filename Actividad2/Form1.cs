@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Timers;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace Actividad2
 {
@@ -36,7 +37,14 @@ namespace Actividad2
                      AgentsFinish = false,
                      done_prim = false,
                      done_kruskal = false,
-                     done_dijkstra = false;
+                     done_dijkstra = false,
+                     done_BFS = false,
+                     done_DIVDE = false,
+                     done_Brute = false;
+
+        long divide_time,
+             brute_time;
+
         private int cant_agentes = -1,
                     path_maker = 0;
         private Point dragCursorPoint;
@@ -196,6 +204,10 @@ namespace Actividad2
             this.DivdeLabel.Text = "Divide";
             this.done_prim = false;
             this.done_kruskal = false;
+            this.done_BFS = false;
+            this.done_dijkstra = false;
+            this.done_DIVDE = false;
+            this.done_Brute = false;
         }
 
         private void SaveBTN_Click(object sender, EventArgs e)
@@ -412,7 +424,7 @@ namespace Actividad2
         {
             if (this.IsJoined)
             {
-                if(this.path_maker == 0)
+                if (this.path_maker == 0)
                 {
                     this.RESET();
                     cant_agentes = (cant_agentes == -1) ? Circs.Count : cant_agentes;
@@ -438,11 +450,11 @@ namespace Actividad2
                     }
                     SetTimer();
                 }
-                else if(done_kruskal && done_prim)
+                else if (done_kruskal && done_prim)
                 {
                     this.RESET();
                 }
-                else if(this.path_maker == 1 && !done_kruskal)
+                else if (this.path_maker == 1 && !done_kruskal)
                 {
                     /*
                      * KRUSKAL
@@ -679,6 +691,27 @@ namespace Actividad2
 
                     }
                 }
+                else if (this.path_maker == 4 && !done_BFS)
+                {
+                    List<Arista> mapa = null;
+                    bool found = false;
+                    foreach(vertice v in this.Circs)
+                    {
+                        mapa = v.breadth(this.Circs.Count);
+                        if (mapa != null)
+                        {
+                            this.paintAristaList(mapa);
+                            this.paintNiveles();
+                            found = true;
+                            break;
+                        }
+                        this.Circs.ForEach((c) => { c.ResetVisit(); });
+                    }
+                    if (!found)
+                    {
+                        MessageBox.Show("No se puede crear el arbol");
+                    }
+                }
             }
         }
 
@@ -726,7 +759,6 @@ namespace Actividad2
                 caminosf.ShowDialog();
             }
         }
-
 
         #endregion </Actividad 3>
 
@@ -801,6 +833,8 @@ namespace Actividad2
             }
             return null;
         }
+
+
         #endregion </Actividad 4>
 
         #region <Actividad 5>
@@ -821,6 +855,261 @@ namespace Actividad2
         }
 
         #endregion </Actividad 5>
+
+        #region <Actividad 6>
+        
+        private void paintAristaList(List<Arista> aristas)
+        {
+            Bitmap bitmap = (Bitmap)this.PictureDivide.Image.Clone();
+            foreach(Arista a in aristas)
+            {
+                a.SetColors(Color.DarkRed, bitmap, true);
+            }
+            this.PictureDivide.Image = bitmap;
+        }
+
+        private void paintNiveles()
+        {
+            Bitmap bitmap = (Bitmap)this.PictureDivide.Image.Clone();
+            int size = Convert.ToInt32(bitmap.Width * 0.05);
+            SolidBrush brush = new SolidBrush(Color.Cyan);
+            Graphics graphics = Graphics.FromImage(bitmap);
+            Font font = new Font("Arial", size);
+            foreach(vertice v in this.Circs)
+            {
+                graphics.DrawString(v.Nivel.ToString(), font, brush, (v.getX() - size), (v.getY() - size));
+            }
+            this.PictureDivide.Image = bitmap;
+        }
+
+        private void DivideStatus_Click(object sender, EventArgs e)
+        {
+                
+            if (this.Circs.Count > 0)
+            {
+                Stopwatch watch = Stopwatch.StartNew();
+                Bitmap bitmap = (Bitmap)this.PictureDivide.Image.Clone();
+                List<vertice>  closest_pairX, closest_pairY,closest_pair, verticesSorted = new List<vertice>();
+
+                this.Circs.ForEach((v) => { verticesSorted.Add(v); });
+
+                verticesSorted.Sort(delegate (vertice a, vertice b) {
+                    if (a.getX() == b.getX())
+                    {
+                        return 0;
+                    }
+                    else if (a.getX() > b.getX())
+                    {
+                        return 1;
+                    }
+                    else
+                    {
+                        return -1;
+                    }
+                });
+
+                closest_pairX =  this.divideyVenceras(verticesSorted);
+                verticesSorted.Sort(delegate (vertice a, vertice b) {
+                    if (a.getY() == b.getY())
+                    {
+                        return 0;
+                    }
+                    else if (a.getY() > b.getY())
+                    {
+                        return 1;
+                    }
+                    else
+                    {
+                        return -1;
+                    }
+                });
+                closest_pairY = this.divideyVenceras(verticesSorted);
+
+                if ((closest_pairX[0].calcDistBetween(closest_pairX[1])) < (closest_pairY[0].calcDistBetween(closest_pairY[1])))
+                {
+                    closest_pair = closest_pairX;
+                }
+                else
+                {
+                    closest_pair = closest_pairY;
+                }
+
+                Graphics graphics = Graphics.FromImage(bitmap);
+                graphics.DrawLine(new Pen(Color.FromArgb(255,138,219,8), 4), closest_pair[0].GetPoint(), closest_pair[1].GetPoint());
+                this.PictureDivide.Image = bitmap;
+                done_DIVDE = true;
+                watch.Stop();
+                divide_time = watch.ElapsedMilliseconds;
+                if (done_Brute)
+                {
+                    MessageBox.Show($"Tiempo de divide y venceras: {divide_time}\nTiempo de fuerza bruta:{brute_time}");
+                }
+            }
+        }
+        
+        private List<List<vertice>> DividirLista(List<vertice> original)
+        {
+            List<List<vertice>> result = new List<List<vertice>>();
+            if(original.Count > 1)
+            {
+                List<vertice> partI = new List<vertice>(),
+                              partII = new List<vertice>();
+                int middle = (int)Math.Round((double)original.Count / 2),
+                    h = 0;
+                for(; h < middle; h++)
+                {
+                    partI.Add(original[h]); 
+                }
+                result.Add(partI);
+                for(;h<original.Count; h++)
+                {
+                    partII.Add(original[h]);
+                }
+                result.Add(partII);
+                return result;
+            }
+            else
+            {
+                result.Add(original);
+                return result;
+            }
+        }
+
+        private bool checkAdyacentes(List<vertice> puntos_a, List<vertice> puntos_b, List<List<vertice>> listas,double distI,double distII)
+        {
+            vertice remplazoA, remplazoB;
+            double newDistI, newDistII;
+            bool result = false;
+            remplazoA = puntos_a[0].checkCricsinRange(distI,listas[1]);
+            if (remplazoA == null)
+            {
+                remplazoA = puntos_a[1].checkCricsinRange(distI,listas[1]);
+                if (remplazoA != null)
+                {
+                    puntos_a[0] = remplazoA;
+                    result = true;
+                }
+            }
+            else
+            {
+                puntos_a[1] = remplazoA;
+                result = true;
+            }
+            remplazoB = puntos_b[0].checkCricsinRange(distII, listas[0]);
+            if (remplazoB == null)
+            {
+                 remplazoB = puntos_b[1].checkCricsinRange(distII, listas[1]);
+                if (remplazoB != null)
+                {
+                    puntos_b[0] = remplazoB;
+                    result = true;
+                }
+            }
+            else
+            {
+                puntos_b[1] = remplazoB;
+                result = true;
+            }
+            newDistI = puntos_a[0].calcDistBetween(puntos_a[1]);
+            newDistII = puntos_b[0].calcDistBetween(puntos_b[1]);
+            if (newDistI == distI && newDistII == distII)
+            {
+                return false;
+            }
+            return result;
+        }
+
+        private List<vertice> divideyVenceras(List<vertice> lista)
+        {
+
+            lista = (lista == null) ? this.Circs : lista;
+            if(lista.Count > 5)
+            {
+                List<List<vertice>> listas = new List<List<vertice>>();
+                List<vertice> puntos_a = new List<vertice>(),
+                              puntos_b = new List<vertice>();
+                double distI, distII;
+                listas = this.DividirLista(lista);
+                puntos_a = this.divideyVenceras(listas[0]);
+                puntos_b = this.divideyVenceras(listas[1]);
+                do
+                {
+                    distI = puntos_a[0].calcDistBetween(puntos_a[1]);
+                    distII = puntos_b[0].calcDistBetween(puntos_b[1]);
+                } while (checkAdyacentes(puntos_a,puntos_b,listas,distI,distII));
+                return (distI < distII) ? puntos_a : puntos_b;
+            }
+            else
+            {
+                double minimo_actual = this.PictureBrute.Image.Width * 20,
+                    distancia_actual;
+                List<vertice> resultado = new List<vertice>();
+                vertice a, b;
+                for(int h = 0; h < lista.Count; h++)
+                {
+                    a = lista[h];
+                    for (int k =0; k < lista.Count; k++)
+                    {
+                        b = lista[k];
+                        if(b != a)
+                        {
+                            distancia_actual = a.calcDistBetween(b);
+                            if (distancia_actual < minimo_actual)
+                            {
+                                minimo_actual = distancia_actual;
+                                resultado.Clear();
+                                resultado.Add(a);
+                                resultado.Add(b);
+                            }
+                        }
+                    }
+                }
+                return resultado;
+            }
+        }
+
+        private void fuerzaBrutaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.Circs.Count > 0)
+            {
+                //this.RESET();
+
+                Stopwatch watch = Stopwatch.StartNew();
+                double minimo_actual = this.PictureBrute.Image.Width * 20;
+                vertice vertice_a=null, vertice_b=null;
+                foreach(vertice v1 in this.Circs)
+                {
+                    foreach(vertice v2 in this.Circs)
+                    {
+                        if(v1 != v2)
+                        {
+                            if (v1.calcDistBetween(v2) < minimo_actual)
+                            {
+                                minimo_actual = v1.calcDistBetween(v2);
+                                vertice_a = v1;
+                                vertice_b = v2;
+                            }
+                        }
+                    }
+                }
+                if (vertice_a != null)
+                {
+                    Bitmap bitmap = (Bitmap)this.PictureBrute.Image.Clone();
+                    Graphics graphics = Graphics.FromImage(bitmap);
+                    graphics.DrawLine(new Pen(Color.FromArgb(255, 138, 219, 8), 4), vertice_a.GetPoint(), vertice_b.GetPoint());
+                    this.PictureBrute.Image = bitmap;
+                }
+                done_Brute = true;
+                watch.Stop();
+                brute_time = watch.ElapsedMilliseconds;
+                if (done_DIVDE)
+                {
+                    MessageBox.Show($"Tiempo de divide y venceras: {divide_time}\nTiempo de fuerza bruta:{brute_time}");
+                }
+            }
+        }
+
+        #endregion </Actividad 6>
 
         #endregion </Script>
 
@@ -890,7 +1179,7 @@ namespace Actividad2
             this.name = $"({pA.getName()} Entre {pB.getName()})";
             this.painted = false;
             this.distancia = calc_distancia();
-            if (Arista.Aristas.ContainsKey(this.name))
+            if (!Arista.Aristas.ContainsKey(this.name))
             {
                 Arista.Aristas.Add(this.name, this);
             }
@@ -1015,6 +1304,7 @@ namespace Actividad2
         int radio;
         string name;
         bool visited;
+        int nivel;
         Dictionary<vertice,Arista> aristas;
 
         public vertice(string name,int x, int y,int radio)
@@ -1030,6 +1320,18 @@ namespace Actividad2
         public override string ToString()
         {
             return $"Circulo {this.name}: (x:{cords[0]}, y:{cords[1]}, radio:{this.radio})";
+        }
+
+        public int Nivel
+        {
+            get
+            {
+                return this.nivel;
+            }
+            set
+            {
+                this.nivel = value;
+            }
         }
 
         public vertice Clone()
@@ -1060,7 +1362,49 @@ namespace Actividad2
             return false;
         }
 
-        public bool Bresenham(Bitmap bitmap, vertice other)
+        public double calcDistBetween(vertice other)
+        {
+            /*
+             * Calcula la distancia entre un vertice y otro
+             */
+            double dist;
+            int dx = other.getX() - this.getX(),
+                dy = other.getY() - this.getY();
+            if (dx != 0 && dy != 0)
+            {
+                dist = (double)(Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2)));
+            }
+            else if (dx == 0)
+            {
+                dist = (double)(Math.Abs(dy));
+            }
+            else
+            {
+                dist = (double)(Math.Abs(dx));
+            }
+            return dist;
+        }
+
+        public vertice checkCricsinRange(double dist, List<vertice> circulos=null)
+        {
+            circulos = (circulos == null) ? vertice.Vertices : circulos;
+            vertice actual = null;
+            foreach (vertice v in circulos)
+            {
+                if((((Math.Pow((this.cords[0] - v.getX()), 2) + (Math.Pow((this.cords[1] - v.getY()), 2))) - Math.Pow(dist + 5, 2)) <= 0))
+                {
+                    if(dist > this.calcDistBetween(v) && v != this)
+                    {
+                        dist = this.calcDistBetween(v);
+                        actual = v;
+                    }
+                }
+            }
+            return actual;
+
+        }
+
+        public bool Bresenham(Bitmap bitmap, vertice other, bool force = false)
         {
 
             if (this.aristas.ContainsKey(other))
@@ -1077,11 +1421,11 @@ namespace Actividad2
 
             if (dx >= dy)
             {
-                ok = BresenhamX(x0, y0, x1, y1, dy, dx,bitmap, arista_points,other);
+                ok = BresenhamX(x0, y0, x1, y1, dy, dx,bitmap, arista_points,other,force);
             }
             else
             {
-                ok = BresenhamY(x0, y0, x1, y1, dy, dx, bitmap, arista_points, other);
+                ok = BresenhamY(x0, y0, x1, y1, dy, dx, bitmap, arista_points, other,force);
             }
 
             if (!ok)
@@ -1094,7 +1438,7 @@ namespace Actividad2
             return true;//nuevo
         }
 
-        private bool BresenhamX(int x0, int y0, int x1, int y1, int dy, int dx, Bitmap bitmap, List<int[]> arista, vertice other)
+        private bool BresenhamX(int x0, int y0, int x1, int y1, int dy, int dx, Bitmap bitmap, List<int[]> arista, vertice other, bool force = false)
         {
             int error = 2 * dy - dx,
                 j = 2 * dy,
@@ -1130,7 +1474,7 @@ namespace Actividad2
                     error += k;
                 }
                 x0++;
-                if (new ColorRGB(bitmap.GetPixel(x0, y0)).Get_RGB() != "255,255,255" && !this.iSelf(x0, y0) && !(other.iSelf(x0, y0)))
+                if (new ColorRGB(bitmap.GetPixel(x0, y0)).Get_RGB() != "255,255,255" && !this.iSelf(x0, y0) && !(other.iSelf(x0, y0)) && !force)
                 {
                     return false;
                 }
@@ -1139,7 +1483,7 @@ namespace Actividad2
             return true;
         }
 
-        private bool BresenhamY(int x0, int y0, int x1, int y1, int dy, int dx, Bitmap bitmap, List<int[]> arista, vertice other)
+        private bool BresenhamY(int x0, int y0, int x1, int y1, int dy, int dx, Bitmap bitmap, List<int[]> arista, vertice other, bool force = false)
         {
             int error = 2 * dx - dy,
                 j = 2 * dx,
@@ -1175,7 +1519,7 @@ namespace Actividad2
                     error += k;
                 }
                 y0++;
-                if (new ColorRGB(bitmap.GetPixel(x0, y0)).Get_RGB() != "255,255,255" && !this.iSelf(x0, y0) && !(other.iSelf(x0, y0)))
+                if (new ColorRGB(bitmap.GetPixel(x0, y0)).Get_RGB() != "255,255,255" && !this.iSelf(x0, y0) && !(other.iSelf(x0, y0)) && !force)
                 {
                     return false;
                 }
@@ -1216,6 +1560,58 @@ namespace Actividad2
                 }
 
             }
+        }
+
+        public List<Arista> breadth(int lenVexs)
+
+        {
+
+            vertice vex = this;
+            vertice actual;
+            Dictionary<vertice, Arista> vecinos;
+            Queue<vertice> cola = new Queue<vertice>();
+            List<Arista> visitadas = new List<Arista>();
+            cola.Enqueue(vex);
+            vex.Nivel = 0;
+            int? maxLevel = null;
+            int vexs_found = 1;
+            bool isLeaf;
+
+            while (cola.Count != 0)
+            {
+                isLeaf = true;
+                actual = cola.Dequeue();
+                vecinos = actual.GetVecinos();
+                actual.Visit();
+                foreach (vertice v in vecinos.Keys)
+                {
+                    if (!v.IsVisited())
+                    {
+                        vexs_found++;
+                        v.Nivel = actual.Nivel + 1;
+                        isLeaf = false;
+                        visitadas.Add(vecinos[v]);
+                        v.Visit();
+                        cola.Enqueue(v);
+                    }
+                }
+                if (isLeaf)
+                {
+                    if (maxLevel == null)
+                    {
+                        maxLevel = actual.Nivel;
+                    }
+                    else if(maxLevel != actual.Nivel)
+                    {
+                        return null;
+                    }
+                }
+            }
+            if (vexs_found != lenVexs)
+            {
+                return null;
+            }
+            return visitadas;
         }
 
         public void depth(vertice vex = null)
@@ -1615,13 +2011,7 @@ namespace Actividad2
                 {
                     break;
                 }
-            }/*
-            while(Estacion != destino)
-            {
-                verticieActual = this.Estacion;
-                this.Estacion = (vertice)opciones.Dequeue().Data[0];
-                this.Recorrer(verticieActual.GetVecinos()[Estacion],false);
-            }*/
+            }
             this.recorrerDijkstra(opciones);
             this.Die();
 

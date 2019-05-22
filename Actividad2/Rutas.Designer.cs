@@ -36,6 +36,7 @@
             this.op_kruskal = new System.Windows.Forms.RadioButton();
             this.op_prim = new System.Windows.Forms.RadioButton();
             this.DijkstraBTN = new System.Windows.Forms.RadioButton();
+            this.arbolBSFbtn = new System.Windows.Forms.RadioButton();
             this.Controls_panel.SuspendLayout();
             this.Choices.SuspendLayout();
             this.SuspendLayout();
@@ -91,10 +92,11 @@
             this.Choices.Controls.Add(this.op_kruskal);
             this.Choices.Controls.Add(this.op_prim);
             this.Choices.Controls.Add(this.DijkstraBTN);
+            this.Choices.Controls.Add(this.arbolBSFbtn);
             this.Choices.Font = new System.Drawing.Font("Fatherland Faker", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Choices.Location = new System.Drawing.Point(101, 107);
+            this.Choices.Location = new System.Drawing.Point(55, 110);
             this.Choices.Name = "Choices";
-            this.Choices.Size = new System.Drawing.Size(349, 39);
+            this.Choices.Size = new System.Drawing.Size(453, 39);
             this.Choices.TabIndex = 1;
             // 
             // Estandar
@@ -161,6 +163,23 @@
             this.DijkstraBTN.UseVisualStyleBackColor = false;
             this.DijkstraBTN.CheckedChanged += new System.EventHandler(this.op_kruskal_CheckedChanged);
             // 
+            // arbolBSFbtn
+            // 
+            this.arbolBSFbtn.Appearance = System.Windows.Forms.Appearance.Button;
+            this.arbolBSFbtn.AutoSize = true;
+            this.arbolBSFbtn.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.arbolBSFbtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.arbolBSFbtn.Font = new System.Drawing.Font("Russian Dollmaker", 22F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.arbolBSFbtn.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(78)))), ((int)(((byte)(159)))), ((int)(((byte)(8)))));
+            this.arbolBSFbtn.Location = new System.Drawing.Point(352, 3);
+            this.arbolBSFbtn.Name = "arbolBSFbtn";
+            this.arbolBSFbtn.Size = new System.Drawing.Size(98, 33);
+            this.arbolBSFbtn.TabIndex = 4;
+            this.arbolBSFbtn.TabStop = true;
+            this.arbolBSFbtn.Text = "ARBOL BSF";
+            this.arbolBSFbtn.UseVisualStyleBackColor = false;
+            this.arbolBSFbtn.CheckedChanged += new System.EventHandler(this.op_kruskal_CheckedChanged);
+            // 
             // Rutas
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -192,5 +211,6 @@
         private System.Windows.Forms.RadioButton Estandar;
         private System.Windows.Forms.RadioButton op_prim;
         private System.Windows.Forms.RadioButton DijkstraBTN;
+        private System.Windows.Forms.RadioButton arbolBSFbtn;
     }
 }
