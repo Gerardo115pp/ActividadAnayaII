@@ -941,10 +941,9 @@ namespace Actividad2
             if (this.Circs.Count > 1)
             {
                 Bitmap bitmap = (Bitmap)this.PictureDivide.Image.Clone();
-                List<vertice>  closest_pairX, closest_pairY,closest_pair, verticesSortedX = new List<vertice>(), verticesSortedY = new List<vertice>();
+                List<vertice> closest_pair, verticesSortedX = new List<vertice>();
 
                 this.Circs.ForEach((v) => { verticesSortedX.Add(v); });
-                this.Circs.ForEach((v) => { verticesSortedY.Add(v); });
 
                 verticesSortedX.Sort(delegate (vertice a, vertice b) {
                     if (a.getX() == b.getX())
@@ -960,33 +959,9 @@ namespace Actividad2
                         return -1;
                     }
                 });
-                verticesSortedY.Sort(delegate (vertice a, vertice b) {
-                    if (a.getY() == b.getY())
-                    {
-                        return 0;
-                    }
-                    else if (a.getY() > b.getY())
-                    {
-                        return 1;
-                    }
-                    else
-                    {
-                        return -1;
-                    }
-                });
 
                 Stopwatch watch = Stopwatch.StartNew();
-                closest_pairX =  this.divideyVenceras(verticesSortedX);
-                closest_pairY = this.divideyVenceras(verticesSortedY);
-
-                if ((closest_pairX[0].calcDistBetween(closest_pairX[1])) < (closest_pairY[0].calcDistBetween(closest_pairY[1])))
-                {
-                    closest_pair = closest_pairX;
-                }
-                else
-                {
-                    closest_pair = closest_pairY;
-                }
+                closest_pair =  this.divideyVenceras(verticesSortedX);
 
                 Graphics graphics = Graphics.FromImage(bitmap);
                 graphics.DrawLine(new Pen(Color.FromArgb(255,138,219,8), 4), closest_pair[0].GetPoint(), closest_pair[1].GetPoint());
@@ -1032,6 +1007,14 @@ namespace Actividad2
 
         private bool checkAdyacentes(List<vertice> puntos_a, List<vertice> puntos_b, List<List<vertice>> listas,double distI,double distII)
         {
+            /*
+             * Deprecado
+             * 
+             * Funcion que verifica en un rango determinado los vertices que puedan encontrarse cerca
+             * Cerca de los vertices que estan en los puntos a y los puntos b, donde estos son dos listas
+             * de vertices. DistI y DistII son distancias entre estos dos vertices, 'listas' es el
+             * super conjunto de vertices.
+             */
             vertice remplazoA, remplazoB;
             double newDistI, newDistII;
             bool result = false;
@@ -1080,19 +1063,60 @@ namespace Actividad2
             lista = (lista == null) ? this.Circs : lista;
             if(lista.Count > 5)
             {
-                List<List<vertice>> listas = new List<List<vertice>>();
-                List<vertice> puntos_a = new List<vertice>(),
-                              puntos_b = new List<vertice>();
-                double distI, distII;
+                List<List<vertice>> listas = new List<List<vertice>>(),
+                                    half;
+                List<vertice> puntos_a,
+                              puntos_b,
+                              closest;
+                double distI, distII, minima;
                 listas = this.DividirLista(lista);
                 puntos_a = this.divideyVenceras(listas[0]);
                 puntos_b = this.divideyVenceras(listas[1]);
-                do
+
+                distI = puntos_a[0].calcDistBetween(puntos_a[1]);
+                distII = puntos_b[0].calcDistBetween(puntos_b[1]);
+
+                closest = (distI < distII) ? puntos_a : puntos_b;
+                minima = (closest == puntos_a) ? distI : distII;
+
+                half = getHalf(listas[0],listas[1],minima);
+                half[0].Sort(delegate (vertice a, vertice b)
                 {
-                    distI = puntos_a[0].calcDistBetween(puntos_a[1]);
-                    distII = puntos_b[0].calcDistBetween(puntos_b[1]);
-                } while (checkAdyacentes(puntos_a,puntos_b,listas,distI,distII));
-                return (distI < distII) ? puntos_a : puntos_b;
+                    if (a.Y == b.Y)
+                    {
+                        return 0;
+                    }
+                    else if (a.Y > b.Y)
+                    {
+                        return 1;
+                    }
+                    else
+                    {
+                        return -1;
+                    }
+                }
+                );
+                half[1].Sort(delegate (vertice a, vertice b)
+                {
+                    if (a.Y == b.Y)
+                    {
+                        return 0;
+                    }
+                    else if (a.Y > b.Y)
+                    {
+                        return 1;
+                    }
+                    else
+                    {
+                        return -1;
+                    }
+                }
+                );
+
+                puntos_a = checkCenter(half, minima);
+
+
+                return (puntos_a == null) ? closest : puntos_a;
             }
             else
             {
@@ -1121,6 +1145,59 @@ namespace Actividad2
                 }
                 return resultado;
             }
+        }
+
+        private List<vertice> checkCenter(List<List<vertice>> half, double delta)
+        {
+            List<vertice> best = new List<vertice>();
+            int max_iterations = (half[1].Count > 6) ? 6 : (half[1].Count - 1);
+            for(int h = 0; h < half[0].Count; h++)
+            {
+                for (int k = 0; k <= max_iterations;k++)
+                {
+                    if(half[0][h].calcDistBetween(half[1][k]) < delta)
+                    {
+                        delta = half[0][h].calcDistBetween(half[1][k]);
+                        best.Clear();
+                        best.Add(half[0][h]);
+                        best.Add(half[1][k]);
+                    }
+                }
+            }
+            return (best.Count == 0) ? null : best;
+        }
+
+        private List<List<vertice>> getHalf(List<vertice> left, List<vertice> right, double delta)
+        {
+            List<List<vertice>> half = new List<List<vertice>>();
+            half.Add(new List<vertice>());
+            half.Add(new List<vertice>());
+            int h = left.Count - 1;
+            vertice Pivot = left[h]; 
+            for (;h >= 0; h--)
+            {
+                if ((Pivot.X - left[h].X) <= delta)
+                {
+                    half[0].Add(left[h]);
+                }
+                else
+                {
+                    break;
+                }
+            }
+            Pivot = right[0];
+            for (h = 0; h < right.Count; h++)
+            {
+                if ((right[h].X - Pivot.X) <= delta)
+                {
+                    half[1].Add(right[h]);
+                }
+                else
+                {
+                    break;
+                }
+            }
+            return half;
         }
 
         private void fuerzaBrutaToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1746,6 +1823,16 @@ namespace Actividad2
             return this.cords[1];
         }
 
+        public int Y
+        {
+            get { return this.cords[1];  }
+        }
+
+        public int X
+        {
+            get { return this.cords[0]; }
+        }
+
         public int GetRadio()
         {
             return this.radio;
@@ -2173,7 +2260,7 @@ namespace Actividad2
         }
 
         private bool isSafe(Agente agente, vertice destino, Arista Ruta)
-        {
+         {
             if ((agente.Estacion == destino) && agente.isEvil)
             {
                 return false;
