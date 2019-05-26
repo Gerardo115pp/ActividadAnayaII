@@ -15,3 +15,5 @@ C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\
 C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\obj\Debug\Actividad2.DescribePK.resources
 C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\obj\Debug\Actividad2.DijkstraOptions.resources
 C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\obj\Debug\Actividad2.STDselector.resources
+C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\obj\Debug\Actividad2.DijkstraMultOptions.resources
+C:\Users\Usuario\Documents\Programas C#\Actividades Anaya\Actividad2\Actividad2\obj\Debug\Actividad2.PresaOptions.resources

@@ -65,6 +65,12 @@
     <Compile Include="DescribePK.Designer.cs">
       <DependentUpon>DescribePK.cs</DependentUpon>
     </Compile>
+    <Compile Include="DijkstraMultOptions.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DijkstraMultOptions.Designer.cs">
+      <DependentUpon>DijkstraMultOptions.cs</DependentUpon>
+    </Compile>
     <Compile Include="DijkstraOptions.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -82,6 +88,12 @@
     </Compile>
     <Compile Include="Form2.Designer.cs">
       <DependentUpon>Form2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PresaOptions.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PresaOptions.Designer.cs">
+      <DependentUpon>PresaOptions.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -106,6 +118,9 @@
     <EmbeddedResource Include="DescribePK.resx">
       <DependentUpon>DescribePK.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="DijkstraMultOptions.resx">
+      <DependentUpon>DijkstraMultOptions.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="DijkstraOptions.resx">
       <DependentUpon>DijkstraOptions.cs</DependentUpon>
     </EmbeddedResource>
@@ -114,6 +129,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Form2.resx">
       <DependentUpon>Form2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PresaOptions.resx">
+      <DependentUpon>PresaOptions.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

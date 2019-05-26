@@ -30,7 +30,7 @@ namespace Actividad2
                 TreeView.Nodes.Add(v.ToString());
                 foreach(vertice child_v in v.GetVecinos().Keys)
                 {
-                    TreeView.Nodes[h].Nodes.Add(child_v.ToString());
+                    TreeView.Nodes[h].Nodes.Add($"{v.GetVecinos()[child_v]} -> {child_v}");
                 }
                 h++;
             }

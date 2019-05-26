@@ -37,6 +37,7 @@
             this.op_prim = new System.Windows.Forms.RadioButton();
             this.DijkstraBTN = new System.Windows.Forms.RadioButton();
             this.arbolBSFbtn = new System.Windows.Forms.RadioButton();
+            this.DijkstraMult = new System.Windows.Forms.RadioButton();
             this.Controls_panel.SuspendLayout();
             this.Choices.SuspendLayout();
             this.SuspendLayout();
@@ -93,10 +94,12 @@
             this.Choices.Controls.Add(this.op_prim);
             this.Choices.Controls.Add(this.DijkstraBTN);
             this.Choices.Controls.Add(this.arbolBSFbtn);
+            this.Choices.Controls.Add(this.DijkstraMult);
             this.Choices.Font = new System.Drawing.Font("Fatherland Faker", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Choices.Location = new System.Drawing.Point(55, 110);
+            this.Choices.Location = new System.Drawing.Point(53, 94);
+            this.Choices.MaximumSize = new System.Drawing.Size(459, 0);
             this.Choices.Name = "Choices";
-            this.Choices.Size = new System.Drawing.Size(453, 39);
+            this.Choices.Size = new System.Drawing.Size(453, 78);
             this.Choices.TabIndex = 1;
             // 
             // Estandar
@@ -180,6 +183,22 @@
             this.arbolBSFbtn.UseVisualStyleBackColor = false;
             this.arbolBSFbtn.CheckedChanged += new System.EventHandler(this.op_kruskal_CheckedChanged);
             // 
+            // DijkstraMult
+            // 
+            this.DijkstraMult.Appearance = System.Windows.Forms.Appearance.Button;
+            this.DijkstraMult.AutoSize = true;
+            this.DijkstraMult.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.DijkstraMult.Font = new System.Drawing.Font("Russian Dollmaker", 22F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.DijkstraMult.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(78)))), ((int)(((byte)(159)))), ((int)(((byte)(8)))));
+            this.DijkstraMult.Location = new System.Drawing.Point(3, 42);
+            this.DijkstraMult.Name = "DijkstraMult";
+            this.DijkstraMult.Size = new System.Drawing.Size(163, 33);
+            this.DijkstraMult.TabIndex = 5;
+            this.DijkstraMult.TabStop = true;
+            this.DijkstraMult.Text = "Dijkstra Multiple";
+            this.DijkstraMult.UseVisualStyleBackColor = false;
+            this.DijkstraMult.CheckedChanged += new System.EventHandler(this.op_kruskal_CheckedChanged);
+            // 
             // Rutas
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -212,5 +231,6 @@
         private System.Windows.Forms.RadioButton op_prim;
         private System.Windows.Forms.RadioButton DijkstraBTN;
         private System.Windows.Forms.RadioButton arbolBSFbtn;
+        private System.Windows.Forms.RadioButton DijkstraMult;
     }
 }

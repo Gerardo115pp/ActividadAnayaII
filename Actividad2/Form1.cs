@@ -45,6 +45,9 @@ namespace Actividad2
         long divide_time,
              brute_time;
 
+        int pesoBrute,
+            pesoDivide;
+
         private int cant_agentes = -1,
                     path_maker = 0;
         private Point dragCursorPoint;
@@ -409,8 +412,6 @@ namespace Actividad2
 
         }
 
-
-
         #endregion </Fuerza Bruta>
 
         #region <Actividad 3>
@@ -671,7 +672,7 @@ namespace Actividad2
 
                         List<vertice> seleccionados = new List<vertice>();
                         seleccionados.Add(this.Circs[nacimiento]);
-                        for(int h=1;h <= Predators;h++)
+                        for(int h=1;h <= Predators;h++)//Aqui se agregan las depredadoras
                         {
                             seleccionados.Add(MainWindow.randChoice(this.Circs,seleccionados));
                             this.Agentes.Add(new Agente(seleccionados[h],true));
@@ -693,6 +694,7 @@ namespace Actividad2
                 }
                 else if (this.path_maker == 4 && !done_BFS)
                 {
+                    this.RESET();
                     List<Arista> mapa = null;
                     bool found = false;
                     foreach(vertice v in this.Circs)
@@ -710,6 +712,55 @@ namespace Actividad2
                     if (!found)
                     {
                         MessageBox.Show("No se puede crear el arbol");
+                    }
+                }
+                else if (this.path_maker == 5)
+                {
+                    DijkstraMultOptions options = new DijkstraMultOptions(this.Circs.Count);
+                    if (options.ShowDialog() == DialogResult.OK)
+                    {
+                        this.RESET();
+                        Agente.mapa = (Bitmap)this.PictureDivide.Image.Clone();
+                        Agente.mapa_limpio = (Bitmap)Agente.mapa.Clone();
+                        Agente.Box = this.PictureDivide;
+                        List<Dictionary<string, int>> presas = options.Presas;
+                        int Depredadoras = options.Depredadoras,
+                            h = 0;
+                                    
+                        List<Agente> contrato = new List<Agente>();
+                        List<vertice> opciones_depredadoras = new List<vertice>();
+                        this.Circs.ForEach((v) =>
+                        {
+                            if (presas.All((p) => { return p["origen"] != Convert.ToInt32(v.Name); }))
+                            {
+                                opciones_depredadoras.Add(v);
+                            }
+                        }); //Aqui se añaden Los vertices que no pertenecen actualmente a una presa
+                        Agente agente;
+                        foreach(Dictionary<string,int> dic in presas)
+                        { 
+                            agente = new Agente(this.Circs[dic["origen"]]);
+                            contrato.Add(agente);
+                            agente.dieEvent += new Agente.Finish(tryToKillAllAgente);
+                            this.Agentes.Add(agente);
+                            this.threads.Add(new Thread(new ParameterizedThreadStart(agente.Dijkstra)));
+                            this.threads[h].Start(this.Circs[dic["destino"]]);
+                            this.threads[h].Name = $"Presa {dic["origen"]}";
+                            h++;
+                        }
+                        Thread thread;
+                        for (h=0; h < Depredadoras; h++)
+                        {
+                            agente = new Agente(opciones_depredadoras[h], true);
+                            this.Agentes.Add(agente);
+                            thread = new Thread(new ParameterizedThreadStart(agente.DFS));
+                            this.threads.Add(thread);
+                            thread.Start(contrato);
+                        }
+
+                        SetTimer();
+
+
                     }
                 }
             }
@@ -841,10 +892,12 @@ namespace Actividad2
 
         private void killEvilAgents()
         {
-            //MessageBox.Show("Jon Snow Defeted the night king!");
             for (int h=1;h< this.threads.Count; h++)
             {
-                this.threads[h].Abort();
+                if (threads[h] != Thread.CurrentThread)
+                {
+                    this.threads[h].Abort();
+                }
             }
         }
 
@@ -885,15 +938,15 @@ namespace Actividad2
         private void DivideStatus_Click(object sender, EventArgs e)
         {
                 
-            if (this.Circs.Count > 0)
+            if (this.Circs.Count > 1)
             {
-                Stopwatch watch = Stopwatch.StartNew();
                 Bitmap bitmap = (Bitmap)this.PictureDivide.Image.Clone();
-                List<vertice>  closest_pairX, closest_pairY,closest_pair, verticesSorted = new List<vertice>();
+                List<vertice>  closest_pairX, closest_pairY,closest_pair, verticesSortedX = new List<vertice>(), verticesSortedY = new List<vertice>();
 
-                this.Circs.ForEach((v) => { verticesSorted.Add(v); });
+                this.Circs.ForEach((v) => { verticesSortedX.Add(v); });
+                this.Circs.ForEach((v) => { verticesSortedY.Add(v); });
 
-                verticesSorted.Sort(delegate (vertice a, vertice b) {
+                verticesSortedX.Sort(delegate (vertice a, vertice b) {
                     if (a.getX() == b.getX())
                     {
                         return 0;
@@ -907,9 +960,7 @@ namespace Actividad2
                         return -1;
                     }
                 });
-
-                closest_pairX =  this.divideyVenceras(verticesSorted);
-                verticesSorted.Sort(delegate (vertice a, vertice b) {
+                verticesSortedY.Sort(delegate (vertice a, vertice b) {
                     if (a.getY() == b.getY())
                     {
                         return 0;
@@ -923,7 +974,10 @@ namespace Actividad2
                         return -1;
                     }
                 });
-                closest_pairY = this.divideyVenceras(verticesSorted);
+
+                Stopwatch watch = Stopwatch.StartNew();
+                closest_pairX =  this.divideyVenceras(verticesSortedX);
+                closest_pairY = this.divideyVenceras(verticesSortedY);
 
                 if ((closest_pairX[0].calcDistBetween(closest_pairX[1])) < (closest_pairY[0].calcDistBetween(closest_pairY[1])))
                 {
@@ -940,9 +994,10 @@ namespace Actividad2
                 done_DIVDE = true;
                 watch.Stop();
                 divide_time = watch.ElapsedMilliseconds;
+                pesoDivide = (int)closest_pair[0].calcDistBetween(closest_pair[1]);
                 if (done_Brute)
                 {
-                    MessageBox.Show($"Tiempo de divide y venceras: {divide_time}\nTiempo de fuerza bruta:{brute_time}");
+                    MessageBox.Show($"Tiempo de divide y venceras: {divide_time}ms; Peso de Arista: {pesoDivide}\nTiempo de fuerza bruta: {brute_time}ms; Peso de Arista: {pesoBrute}");
                 }
             }
         }
@@ -1070,7 +1125,7 @@ namespace Actividad2
 
         private void fuerzaBrutaToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (this.Circs.Count > 0)
+            if (this.Circs.Count > 1)
             {
                 //this.RESET();
 
@@ -1102,14 +1157,27 @@ namespace Actividad2
                 done_Brute = true;
                 watch.Stop();
                 brute_time = watch.ElapsedMilliseconds;
+                pesoBrute = (int)minimo_actual;
                 if (done_DIVDE)
                 {
-                    MessageBox.Show($"Tiempo de divide y venceras: {divide_time}\nTiempo de fuerza bruta:{brute_time}");
+                    MessageBox.Show($"Tiempo de divide y venceras: {divide_time}ms; Peso de Arista: {pesoDivide}\nTiempo de fuerza bruta: {brute_time}ms; Peso de Arista: {pesoBrute}");
                 }
             }
         }
 
         #endregion </Actividad 6>
+
+        #region <Proyecto>
+
+        private void tryToKillAllAgente()
+        {
+            if(Agente.GoodAgentes.All((a) => { return !a.IsAlive; }))
+            {
+                this.killEvilAgents();
+            }
+        }
+
+        #endregion </Proyecto>
 
         #endregion </Script>
 
@@ -1694,6 +1762,13 @@ namespace Actividad2
         static public PictureBox Box;
         static Dictionary<string, Point> posiciones = new Dictionary<string, Point>();
         static HashSet<Agente> evilAgents = new HashSet<Agente>();
+        static HashSet<Agente> goodAgents = new HashSet<Agente>();
+
+        static public HashSet<Agente> GoodAgentes
+        {
+            get { return Agente.goodAgents;  }
+        }
+
         List<Arista> Historial = new List<Arista>();
         Arista aristaActiva;
         List<vertice> Visitados = new List<vertice>();
@@ -1720,6 +1795,7 @@ namespace Actividad2
             else
             {
                 this.isAlive = true;
+                Agente.goodAgents.Add(this);
             }
             this.SelfSprite = this.DrawSelf(); 
             this.Nacer();
@@ -2028,9 +2104,17 @@ namespace Actividad2
                 etiqueta = Camino.Dequeue().Data;
                 destino = (vertice)etiqueta[0];
                 Elegida = this.Estacion.GetVecinos()[destino];
-                while(!Agente.evilAgents.All((agente => { return this.isSafe(agente, destino, Elegida); })))
+                try
                 {
-                    //MessageBox.Show("Es peligroso!!!!!!!");
+                    while (!Agente.evilAgents.All((agente => { return this.isSafe(agente, destino, Elegida); })))
+                    {
+                        //MessageBox.Show("Es peligroso!!!!!!!");
+                        Thread.Sleep(300);
+                    }
+                }
+                catch (InvalidOperationException)
+                {
+
                     Thread.Sleep(300);
                 }
                 this.Estacion = destino;
@@ -2137,7 +2221,7 @@ namespace Actividad2
         {
             if (!this.isEvil)
             {
-                STDselector nextselector = new STDselector("S i g u i e n t e", vertice.Count);
+                STDselector nextselector = new STDselector($"PRESA {this.name}", vertice.Count);
                 if (nextselector.ShowDialog() == DialogResult.OK)
                 {
                     this.Dijkstra(vertice.getVex(nextselector.Valor));
@@ -2151,12 +2235,12 @@ namespace Actividad2
 
         public void DFS(object datos)
         {
-            List<Agente> data = (List<Agente>)datos;
+            List<Agente> preys = (List<Agente>)datos;
             vertice vengoDe = this.Estacion;
-            Agente prey = data[1];
+            Agente prey = preys[1];
             vengoDe.Visit();
             Dictionary<vertice, Arista> vecinos = vengoDe.GetVecinos();
-            while (prey.isAlive)
+            while (!preys.All(p => { return !p.isAlive; }))
             {
                 foreach (vertice v in vecinos.Keys)
                 {
@@ -2202,6 +2286,22 @@ namespace Actividad2
 
 
         #endregion </Actividad 5 Dijkstra>
+
+        #region <Proyecto>
+
+        public bool IsAlive
+        {
+            get
+            {
+                if (!this.isEvil)
+                {
+                    return isAlive;
+                }
+                return false;
+            }
+        }
+
+        #endregion </Proyecto>
 
         #region <metodos para update>
 
